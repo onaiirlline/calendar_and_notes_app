@@ -443,6 +443,36 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
   .chip{font-size:9.5px}
   .num{font-size:13px;width:24px;height:24px}
 }
+
+/* ===== computer: compact month, scales with window and browser zoom ===== */
+@media (min-width:901px){
+  .app{grid-template-columns:minmax(0,1fr) clamp(300px,25vw,380px)}
+  .cal{padding:12px clamp(16px,1.6vw,28px) 14px;overflow-y:auto}
+  .head{margin-bottom:8px}
+  #mtitle{font-size:clamp(28px,2.6vw,42px);margin-right:12px}
+  .wd{padding-bottom:6px}
+  .wd div{font-size:12px}
+  .grid{grid-template-rows:repeat(var(--rows,5),minmax(0,1fr));min-height:calc(var(--rows,5) * 92px)}
+  .day,.day.we{padding:4px 4px 3px;gap:3px}
+  .num{width:24px;height:24px;font-size:13.5px}
+  .chips{gap:2px}
+  .chip{font-size:11.5px;padding:1px 5px;line-height:1.4}
+  .chip .ck{width:10px;height:10px}
+  .chip .ck::after{left:2.2px;top:.9px;width:2.6px;height:4.6px}
+  .more{font-size:11px}
+  .dn{top:6px;right:5px}
+}
+@media (min-width:601px) and (max-width:900px){
+  #mtitle{font-size:32px}
+  .grid{grid-template-rows:repeat(var(--rows,5),minmax(100px,auto));min-height:0}
+  .day,.day.we{padding:4px 4px 3px;gap:3px}
+  .num{width:24px;height:24px;font-size:13.5px}
+  .chip{font-size:11.5px;padding:1px 5px}
+}
+@media (min-width:1700px){
+  .num{width:26px;height:26px;font-size:14.5px}
+  .chip{font-size:12.5px}
+}
 </style>
 </head>
 <body data-tab="notes">
