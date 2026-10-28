@@ -532,6 +532,37 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
 .up .ut{font-weight:400;color:var(--body)}
 .empty{font-size:13px}
 @media (pointer:coarse){#quick,#daynote,.qtime input{font-size:16px!important}.qcol{gap:8px}.qcol .csw{width:22px;height:22px}.pill{padding:5px 12px;font-size:13px}}
+
+/* ===== notebook: same type as the calendar + inline formatting ===== */
+#appNotes{font-family:var(--font)}
+.wrap{font-size:13px}
+.ed{line-height:1.7}
+#title{font-size:clamp(24px,2.1vw,34px)}
+.b-h .ed{font-size:17px;font-weight:600}
+table{font-size:13px}
+.ni b{font-size:13px}
+.ni span{font-size:11.5px}
+.side-h strong{font-size:14px}
+#search{font-size:13px}
+.side-f{font-size:12.5px}
+.tb{font-size:12.5px}
+.meta,.meta button{font-size:12px}
+.ed b{font-weight:650;color:var(--ink)}
+.ed u{text-underline-offset:2px}
+.ed s{text-decoration-color:var(--muted)}
+.ed mark{background:color-mix(in srgb,#d3a0b4 30%,transparent);color:var(--ink);border-radius:3px;padding:0 2px}
+.ed a{color:var(--accent);text-decoration:underline;text-underline-offset:2px;cursor:text}
+#fbar,#lbar{position:fixed;z-index:60;display:flex;gap:2px;background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:3px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+#fbar[hidden],#lbar[hidden]{display:none}
+#fbar button{min-width:30px;height:30px;border-radius:6px;font-size:14px;color:var(--body);display:grid;place-items:center;padding:0 6px}
+#fbar button:hover{background:var(--hover);color:var(--ink)}
+#fbar button.on{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--ink)}
+#fbar .hl{background:color-mix(in srgb,#d3a0b4 40%,transparent);padding:0 3px;border-radius:3px}
+#lbar{align-items:center;font-size:12.5px}
+#lbar a,#lbar button{padding:5px 10px;border-radius:6px;color:var(--body)}
+#lbar a{color:var(--accent);text-decoration:none}
+#lbar button:hover,#lbar a:hover{background:var(--hover)}
+@media (pointer:coarse){#fbar button{min-width:38px;height:38px;font-size:16px}}
 </style>
 </head>
 <body data-tab="notes">
@@ -587,7 +618,8 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
     <div id="tail"></div>
     <div class="keys">
       <kbd>/</kbd> меню блоков · <kbd>[]</kbd> чек-лист · <kbd>-</kbd> список · <kbd>#</kbd> заголовок · <kbd>&gt;</kbd> важное · <kbd>---</kbd> линия<br>
-      <kbd>Ctrl</kbd>+<kbd>Enter</kbd> отметить пункт · <kbd>Tab</kbd> вложить · <kbd>Alt</kbd>+<kbd>↑↓</kbd> переставить строку · в таблице <kbd>Tab</kbd> следующая ячейка
+      <kbd>Ctrl</kbd>+<kbd>Enter</kbd> отметить пункт · <kbd>Tab</kbd> вложить · <kbd>Alt</kbd>+<kbd>↑↓</kbd> переставить строку · в таблице <kbd>Tab</kbd> следующая ячейка<br>
+      Выделите текст для оформления · <kbd>Ctrl</kbd>+<kbd>B</kbd> жирный · <kbd>I</kbd> курсив · <kbd>U</kbd> подчёркнутый · <kbd>Shift</kbd>+<kbd>X</kbd> зачёркнутый · <kbd>Shift</kbd>+<kbd>H</kbd> маркер · <kbd>K</kbd> ссылка
     </div>
   </div>
 </main>
@@ -941,6 +973,68 @@ const today = () => {
   const s = new Date().toLocaleDateString('ru-RU', {weekday: 'short', day: 'numeric', month: 'long'});
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
+/* ---------- inline formatting: b, i, u, s, mark, a ---------- */
+const INL = {B: 'b', STRONG: 'b', I: 'i', EM: 'i', U: 'u', S: 's', STRIKE: 's', DEL: 's', MARK: 'mark', A: 'a'};
+const escH = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function cleanNode(src, out) {
+  src.childNodes.forEach(n => {
+    if (n.nodeType === 3) { out.appendChild(document.createTextNode(n.nodeValue)); return; }
+    if (n.nodeType !== 1) return;
+    let tag = INL[n.tagName];
+    if (!tag && n.tagName === 'SPAN') {
+      const st = n.style;
+      if (st.backgroundColor && st.backgroundColor !== 'transparent') tag = 'mark';
+      else if (/bold|[6-9]00/.test(st.fontWeight)) tag = 'b';
+      else if (st.fontStyle === 'italic') tag = 'i';
+    }
+    if (n.tagName === 'BR') return;
+    if (tag === 'a') {
+      const h = n.getAttribute('href') || '';
+      if (!/^(https?:|mailto:|tel:)/i.test(h)) tag = null;
+    }
+    if (!tag) { cleanNode(n, out); return; }
+    const el = document.createElement(tag);
+    if (tag === 'a') { el.href = n.getAttribute('href'); el.target = '_blank'; el.rel = 'noopener'; }
+    cleanNode(n, el);
+    if (el.textContent) out.appendChild(el);
+  });
+  return out;
+}
+function cleanHtml(html) {
+  const t = document.createElement('template'); t.innerHTML = html;
+  const d = cleanNode(t.content, document.createElement('div'));
+  const join = el => { [...el.children].forEach(join); let c = el.firstChild;
+    while (c) { const nx = c.nextSibling;
+      if (nx && c.nodeType === 1 && nx.nodeType === 1 && c.tagName === nx.tagName && c.tagName !== 'A') { while (nx.firstChild) c.appendChild(nx.firstChild); nx.remove(); join(c); continue; }
+      c = nx; } };
+  join(d); d.normalize();
+  return d.innerHTML;
+}
+const htmlOf = b => b.html || escH(b.text || '');
+function setHtml(b, html) {
+  const c = cleanHtml(html), d = document.createElement('div'); d.innerHTML = c;
+  b.text = d.textContent;
+  if (c && c !== escH(b.text)) b.html = c; else delete b.html;
+}
+// split an editable at the caret into [html before, html after]
+function splitHtml(ed) {
+  const sel = getSelection(), r = sel.getRangeAt(0).cloneRange();
+  const tail = document.createRange(); tail.selectNodeContents(ed); tail.setStart(r.startContainer, r.startOffset);
+  const box = document.createElement('div'); box.appendChild(tail.cloneContents());
+  const head = document.createRange(); head.selectNodeContents(ed); head.setEnd(r.startContainer, r.startOffset);
+  const box2 = document.createElement('div'); box2.appendChild(head.cloneContents());
+  return [box2.innerHTML, box.innerHTML];
+}
+function inlineMd(b) {
+  if (!b.html) return b.text;
+  const d = document.createElement('div'); d.innerHTML = b.html;
+  const walk = n => [...n.childNodes].map(c => {
+    if (c.nodeType === 3) return c.nodeValue;
+    const t = walk(c);
+    return {B: '**' + t + '**', I: '*' + t + '*', S: '~~' + t + '~~', MARK: '==' + t + '==', U: t, A: '[' + t + '](' + c.getAttribute('href') + ')'}[c.tagName] ?? t;
+  }).join('');
+  return walk(d);
+}
 function setEditable(el) {
   el.contentEditable = 'plaintext-only';
   if (el.contentEditable !== 'plaintext-only') el.contentEditable = 'true';
@@ -1053,8 +1147,9 @@ function blockEl(b) {
     }
     if (b.type === 'bullet') { const d = document.createElement('span'); d.className = 'dot'; w.appendChild(d); }
     const ed = document.createElement('div');
-    ed.className = 'ed'; setEditable(ed); ed.spellcheck = true;
-    ed.textContent = b.text; ed.dataset.ph = PH[b.type];
+    ed.className = 'ed'; ed.contentEditable = 'true'; ed.spellcheck = true;
+    if (b.html) ed.innerHTML = b.html; else ed.textContent = b.text;
+    ed.dataset.ph = PH[b.type];
     w.appendChild(ed);
   }
   const tools = document.createElement('div'); tools.className = 'btools';
@@ -1171,11 +1266,12 @@ doc.addEventListener('input', e => {
   const ed = e.target.closest('.ed, td');
   if (!ed) return;
   if (ed.textContent === '' && ed.innerHTML !== '') ed.innerHTML = '';
+  if (ed.tagName !== 'TD') ed.querySelectorAll('div,p,br').forEach(x => { if (x.tagName === 'BR') x.remove(); else x.replaceWith(...x.childNodes); });
   const w = ed.closest('.block'), b = getB(w.dataset.id);
   if (!b) return;
   if (ed.tagName === 'TD') { b.rows[+ed.dataset.r][+ed.dataset.c] = ed.textContent; save(); return; }
   const t = ed.textContent;
-  b.text = t;
+  if (ed.querySelector('*')) setHtml(b, ed.innerHTML); else { b.text = t; delete b.html; }
   if (b.type === 'text') {
     let m, conv = null;
     if ((m = t.match(/^\[(x|х)?\]\s(.*)$/i)) || (m = t.match(/^\[ \]\s(.*)$/))) {
@@ -1184,12 +1280,12 @@ doc.addEventListener('input', e => {
     else if ((m = t.match(/^#{1,3}\s(.*)$/))) conv = {type: 'h', text: m[1]};
     else if ((m = t.match(/^>\s(.*)$/))) conv = {type: 'quote', text: m[1]};
     else if (/^(---|___|\*\*\*)$/.test(t)) {
-      closeMenu(); b.text = ''; cur = b.id; place('divider'); return;
+      closeMenu(); b.text = ''; delete b.html; cur = b.id; place('divider'); return;
     }
     if (conv) {
       closeMenu();
       const pos = Math.max(0, getCaret(ed) - (t.length - conv.text.length));
-      b.type = conv.type; b.text = conv.text; if (conv.checked) b.checked = true;
+      b.type = conv.type; b.text = conv.text; delete b.html; if (conv.checked) b.checked = true;
       rr(b.id, pos); return;
     }
     if (t.startsWith('/') && !t.includes(' ')) openMenu(ed, b, t.slice(1)); else if (menu.open) closeMenu();
@@ -1205,12 +1301,12 @@ doc.addEventListener('paste', e => {
   if (ed.tagName === 'TD' || lines.length === 1) { document.execCommand('insertText', false, lines.join(ed.tagName === 'TD' ? '\n' : ' ')); return; }
   const b = getB(ed.closest('.block').dataset.id), bl = note().blocks;
   if (hasSel()) document.execCommand('delete');
-  const p = getCaret(ed), tail = b.text.slice(p);
-  b.text = b.text.slice(0, p) + lines[0];
+  const [hb, ha] = splitHtml(ed);
+  setHtml(b, hb + escH(lines[0]));
   const nbs = lines.slice(1).map(parseLine);
   let last = nbs[nbs.length - 1];
   if (last.type === 'divider') { last = mk('text'); nbs.push(last); }
-  const pos = last.text.length; last.text += tail;
+  const pos = last.text.length; setHtml(last, htmlOf(last) + ha);
   bl.splice(bl.indexOf(b) + 1, 0, ...nbs);
   rr(last.id, pos);
 });
@@ -1244,6 +1340,11 @@ doc.addEventListener('keydown', e => {
 
 function onKeyEd(e, ed, b) {
   const bl = note().blocks, i = bl.indexOf(b);
+  if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+    const k = e.key.toLowerCase(), code = e.code;
+    const act = code === 'KeyB' ? 'b' : code === 'KeyI' ? 'i' : code === 'KeyU' ? 'u' : code === 'KeyK' ? 'a' : (e.shiftKey && code === 'KeyX') ? 's' : (e.shiftKey && code === 'KeyH') ? 'mark' : null;
+    if (act) { e.preventDefault(); fmt1(act); return; }
+  }
   if (menu.open) {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
@@ -1270,9 +1371,9 @@ function onKeyEd(e, ed, b) {
       const nb = mk(nt); if (b.ind) nb.ind = b.ind;
       bl.splice(i, 0, nb); rr(b.id, 0); return;
     }
-    const after = b.text.slice(p);
-    b.text = b.text.slice(0, p);
-    const nb = mk(nt, after); if (b.ind && nt !== 'text') nb.ind = b.ind;
+    const [hb, ha] = splitHtml(ed);
+    setHtml(b, hb);
+    const nb = mk(nt); setHtml(nb, ha); if (b.ind && nt !== 'text') nb.ind = b.ind;
     bl.splice(i + 1, 0, nb); rr(nb.id, 0); return;
   }
   if (e.key === 'Tab') {
@@ -1288,7 +1389,7 @@ function onKeyEd(e, ed, b) {
     if (!prev) return;
     e.preventDefault();
     if (TEXTY.includes(prev.type)) {
-      const pos = prev.text.length; prev.text += b.text; bl.splice(i, 1); rr(prev.id, pos);
+      const pos = prev.text.length; setHtml(prev, htmlOf(prev) + htmlOf(b)); bl.splice(i, 1); rr(prev.id, pos);
     } else if (!b.text) { bl.splice(i, 1); rr(prev.id, 'end'); }
     else if (prev.type === 'divider') { bl.splice(i - 1, 1); rr(b.id, 0); }
     else focusB(prev.id, 'end');
@@ -1296,7 +1397,7 @@ function onKeyEd(e, ed, b) {
   }
   if (e.key === 'Delete' && !hasSel() && getCaret(ed) === b.text.length) {
     const nx = bl[i + 1];
-    if (nx && TEXTY.includes(nx.type)) { e.preventDefault(); const pos = b.text.length; b.text += nx.text; bl.splice(i + 1, 1); rr(b.id, pos); }
+    if (nx && TEXTY.includes(nx.type)) { e.preventDefault(); const pos = b.text.length; setHtml(b, htmlOf(b) + htmlOf(nx)); bl.splice(i + 1, 1); rr(b.id, pos); }
     else if (nx && nx.type === 'divider') { e.preventDefault(); bl.splice(i + 1, 1); rr(b.id, 'end'); }
     return;
   }
@@ -1305,6 +1406,84 @@ function onKeyEd(e, ed, b) {
     if (bl[i + dir]) { e.preventDefault(); focusSibling(b, dir); }
   }
 }
+/* floating formatting bar */
+const fbar = document.createElement('div'); fbar.id = 'fbar'; fbar.hidden = true;
+fbar.innerHTML = '<button data-f="b" title="Жирный (Ctrl+B)"><b>Ж</b></button><button data-f="i" title="Курсив (Ctrl+I)"><i>К</i></button><button data-f="u" title="Подчёркнутый (Ctrl+U)"><u>Ч</u></button><button data-f="s" title="Зачёркнутый (Ctrl+Shift+X)"><s>З</s></button><button data-f="mark" title="Выделить цветом (Ctrl+Shift+H)"><span class="hl">М</span></button><button data-f="a" title="Ссылка (Ctrl+K)">🔗</button><button data-f="x" title="Убрать оформление">⌫</button>';
+document.body.appendChild(fbar);
+const lbar = document.createElement('div'); lbar.id = 'lbar'; lbar.hidden = true;
+lbar.innerHTML = '<a target="_blank" rel="noopener">Открыть ↗</a><button>Убрать ссылку</button>';
+document.body.appendChild(lbar);
+fbar.addEventListener('mousedown', e => e.preventDefault());
+lbar.addEventListener('mousedown', e => { if (e.target.tagName === 'BUTTON') e.preventDefault(); });
+fbar.addEventListener('click', e => { const bt = e.target.closest('button'); if (bt) fmt1(bt.dataset.f); });
+function edOfSel() {
+  const s = getSelection(); if (!s.rangeCount) return null;
+  const n = s.getRangeAt(0).commonAncestorContainer;
+  const el = (n.nodeType === 1 ? n : n.parentElement);
+  return el && el.closest('#doc .ed');
+}
+function fmt1(f) {
+  const ed = edOfSel(); if (!ed) return;
+  const s = getSelection(), r = s.getRangeAt(0);
+  if (f === 'a') {
+    const cur = (r.startContainer.parentElement || ed).closest('a');
+    if (cur && ed.contains(cur)) { cur.replaceWith(...cur.childNodes); }
+    else {
+      if (r.collapsed) return;
+      let u = prompt('Адрес ссылки', 'https://'); if (!u || u === 'https://') return;
+      u = u.trim(); if (!/^(https?:|mailto:|tel:)/i.test(u)) u = 'https://' + u;
+      document.execCommand('createLink', false, u);
+    }
+  } else if (f === 'mark') {
+    const m = (r.startContainer.parentElement || ed).closest('mark');
+    if (m && ed.contains(m)) m.replaceWith(...m.childNodes);
+    else if (!r.collapsed) { const frag = r.extractContents(); frag.querySelectorAll('mark').forEach(x => x.replaceWith(...x.childNodes)); const mk2 = document.createElement('mark'); mk2.appendChild(frag); r.insertNode(mk2); s.removeAllRanges(); const nr = document.createRange(); nr.selectNodeContents(mk2); s.addRange(nr); }
+  } else if (f === 'x') {
+    if (r.collapsed) return;
+    document.execCommand('removeFormat');
+    const frag = r.extractContents(); const t = document.createTextNode(frag.textContent); r.insertNode(t);
+    s.removeAllRanges(); const nr = document.createRange(); nr.selectNodeContents(t); s.addRange(nr);
+  } else {
+    document.execCommand('styleWithCSS', false, false);
+    document.execCommand({b: 'bold', i: 'italic', u: 'underline', s: 'strikeThrough'}[f]);
+  }
+  ed.dispatchEvent(new Event('input', {bubbles: true}));
+  posBars();
+}
+function posBars() {
+  const s = getSelection(), ed = edOfSel();
+  fbar.hidden = lbar.hidden = true;
+  if (!ed || !s.rangeCount) return;
+  const r = s.getRangeAt(0);
+  const place2 = (bar, rect) => {
+    bar.hidden = false;
+    const w = bar.offsetWidth, h = bar.offsetHeight;
+    let x = rect.left + rect.width / 2 - w / 2; x = Math.max(8, Math.min(innerWidth - w - 8, x));
+    const below = matchMedia('(pointer:coarse)').matches;
+    let y = below ? rect.bottom + 10 : rect.top - h - 8; if (y < 8) y = rect.bottom + 8; if (y + h > innerHeight - 8) y = rect.top - h - 8;
+    bar.style.left = x + 'px'; bar.style.top = y + 'px';
+  };
+  if (!r.collapsed) {
+    const rect = r.getBoundingClientRect(); if (!rect.width && !rect.height) return;
+    place2(fbar, rect);
+    fbar.querySelectorAll('button').forEach(bt => {
+      const f = bt.dataset.f, n = r.startContainer.parentElement;
+      const on = f === 'mark' ? !!(n && n.closest('mark')) : f === 'a' ? !!(n && n.closest('a')) : ['b','i','u','s'].includes(f) ? document.queryCommandState({b: 'bold', i: 'italic', u: 'underline', s: 'strikeThrough'}[f]) : false;
+      bt.classList.toggle('on', on);
+    });
+    return;
+  }
+  const a = (r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentElement).closest('a');
+  if (a && ed.contains(a)) {
+    lbar.querySelector('a').href = a.href;
+    lbar.querySelector('button').onclick = () => { a.replaceWith(...a.childNodes); ed.dispatchEvent(new Event('input', {bubbles: true})); lbar.hidden = true; };
+    place2(lbar, a.getBoundingClientRect());
+  }
+}
+document.addEventListener('selectionchange', () => requestAnimationFrame(posBars));
+document.addEventListener('scroll', () => { fbar.hidden = lbar.hidden = true; }, true);
+doc.addEventListener('click', e => { const a = e.target.closest('.ed a'); if (a && (e.ctrlKey || e.metaKey)) { e.preventDefault(); window.open(a.href, '_blank', 'noopener'); } });
+
 function exitAfter(b) {
   const bl = note().blocks, j = bl.indexOf(b);
   let nx = bl[j + 1];
@@ -1432,10 +1611,10 @@ function toMd(n) {
   n.blocks.forEach(b => {
     const ind = '  '.repeat(b.ind || 0);
     switch (b.type) {
-      case 'h': out.push('', '## ' + b.text); break;
-      case 'check': out.push(ind + '- [' + (b.checked ? 'x' : ' ') + '] ' + b.text); break;
-      case 'bullet': out.push(ind + '- ' + b.text); break;
-      case 'quote': out.push('> ' + b.text); break;
+      case 'h': out.push('', '## ' + inlineMd(b)); break;
+      case 'check': out.push(ind + '- [' + (b.checked ? 'x' : ' ') + '] ' + inlineMd(b)); break;
+      case 'bullet': out.push(ind + '- ' + inlineMd(b)); break;
+      case 'quote': out.push('> ' + inlineMd(b)); break;
       case 'divider': out.push('---'); break;
       case 'table':
         out.push('');
@@ -1444,7 +1623,7 @@ function toMd(n) {
           if (i === 0) out.push('|' + r.map(() => ' --- ').join('|') + '|');
         });
         out.push(''); break;
-      default: out.push(ind + b.text);
+      default: out.push(ind + inlineMd(b));
     }
   });
   return out.join('\n').replace(/^\n+/, '');
