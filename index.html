@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <title>Блокнот и календарь</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="favicon.png">
@@ -399,6 +399,45 @@ textarea,select{font:inherit}
   #addBtn{display:none}
   #fab{display:grid;place-items:center;position:fixed;right:max(16px, env(safe-area-inset-right, 0px));bottom:calc(84px + env(safe-area-inset-bottom, 0px));width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;font-size:30px;font-weight:300;z-index:8;box-shadow:var(--glow)}
   body[data-tab=notes] #fab{display:none}
+}
+
+/* ===== phones: iPhone / Android polish ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@supports (height:100dvh){html,body{height:100dvh}}
+body{padding-top:env(safe-area-inset-top,0px);overscroll-behavior:none}
+button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#appCal,main,#list,.panel{overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
+.tabs{padding-left:max(12px, env(safe-area-inset-left, 0px));padding-right:max(12px, env(safe-area-inset-right, 0px))}
+@media (pointer:coarse){
+  input:not([type=checkbox]),textarea,select{font-size:16px!important}
+  .ed,td,.b-h .ed{font-size:16px}
+  .b-h .ed{font-size:20px}
+}
+@media (max-width:900px){
+  .cal{padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+  .panel{padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-bottom:110px}
+}
+@media (max-width:760px){
+  .bar-in,.wrap{padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+  aside{top:0;bottom:0;height:auto;padding-top:calc(16px + env(safe-area-inset-top, 0px));padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px));padding-left:max(12px, env(safe-area-inset-left, 0px));width:min(280px, 82vw)}
+  .tabs{padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px))}
+  .tab{min-height:44px}
+  #title{font-size:30px}
+  .wrap{padding-top:20px;padding-bottom:120px}
+  .head{gap:4px;margin-bottom:10px}
+  .head .nb{height:36px;min-width:36px}
+  #ask,#login{padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px))}
+}
+@media (max-width:600px){
+  #fab{bottom:calc(76px + env(safe-area-inset-bottom, 0px))}
+  .ev{padding-top:11px;padding-bottom:11px}
+  .ev input[type=checkbox]{width:20px;height:20px;margin-top:1px}
+  .b-check input{width:20px;height:20px}
+}
+@media (max-width:370px){
+  #mtitle{font-size:32px}
+  .chip{font-size:9.5px}
+  .num{font-size:13px;width:24px;height:24px}
 }
 </style>
 </head>
