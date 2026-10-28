@@ -775,6 +775,92 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
   .side-f button,.side-f label{padding:8px}
   .side-f .hint{font-size:13.5px}
 }
+
+/* month plaques (calendar + finance) */
+#prev,#next,#todayBtn,#fPrev,#fNext,#fToday{display:none!important}
+.head .sp{display:none}
+.mpills{position:relative;flex:1;min-width:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:3px 22px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 20px,#000 calc(100% - 20px),transparent);mask-image:linear-gradient(90deg,transparent,#000 20px,#000 calc(100% - 20px),transparent)}
+.mpills::after{content:"";flex:none;width:1px}
+.mpills::-webkit-scrollbar{display:none}
+.mp{flex:none;display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--body);font-size:13px;font-weight:500;white-space:nowrap;transition:background-color .3s ease,color .3s ease,border-color .3s ease,transform .18s ease}
+.mp small{font-size:11px;font-weight:400;color:var(--muted);transition:color .3s ease}
+.mp:hover{border-color:var(--rule);color:var(--ink)}
+.mp.now::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.mp.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.mp.on small{color:rgba(255,255,255,.78)}
+.mp.on.now::after{background:#fff}
+.fhead{flex-wrap:nowrap}
+#fTitle,#mtitle{flex:none}
+@media (max-width:600px){
+  .head,.fhead{flex-wrap:wrap}
+  .mpills{flex:1 1 100%;margin:4px 0 0;padding:3px 14px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent);mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent)}
+  .fin .fkpi2 .ftile:last-child{grid-column:auto}
+  .mp{height:34px;padding:0 15px;font-size:14px}
+}
+@media (max-width:760px){
+  #scrim{position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.35);transition:opacity .32s ease}
+  body.side #scrim{animation:scrimIn .32s ease}
+}
+@keyframes scrimIn{from{opacity:0}}
+#grid{will-change:transform}
+
+/* finance: one type scale — 12 labels · 14 text · 16 card titles · 24 key numbers */
+.fin{font-size:14px;line-height:1.45;font-variant-numeric:tabular-nums}
+.fin .fch h3{font-size:16px;font-weight:600;letter-spacing:-.005em;text-transform:none;color:var(--ink)}
+.fin .fcard h4{font-size:14px;font-weight:600;color:var(--ink);margin:18px 0 10px}
+.fin .fcard h4:first-of-type{margin-top:6px}
+.fin .fch{margin-bottom:14px}
+.fin .fch2{margin:20px 0 8px}
+.fin .fsub{font-size:16px}
+.fin .ftile{padding:12px 14px;gap:4px}
+.fin .ftile span{font-size:12px;letter-spacing:0;text-transform:none;color:var(--muted);font-weight:400}
+.fin .ftile b,.fin .fsalt input{font-size:clamp(20px,1.7vw,24px);letter-spacing:-.01em}
+.fin .ftile small{font-size:12px}
+.fin .fl span{font-size:12px}
+.fin .fl input,.fin .fl select,.fin .fadd input{font-size:14px;height:36px}
+.fin .fpri,.fin .fsec,.fin .fdel{font-size:14px}
+.fin .fpri{padding:8px 18px}
+.fin .fxrow{padding:9px 4px}
+.fin .fc small,.fin .fd{font-size:13px}
+.fin .fbars{gap:8px}
+.fin .flegend{font-size:13px}
+.fin .flegend small{font-size:12px}
+.fin .flegend.small,.fin .fnote{font-size:12px}
+.fin .ft,.fin .ft td{font-size:14px}
+.fin .ft th{font-size:12px;font-weight:500;padding:8px}
+.fin .ft td{padding:8px}
+.fin .fpin{font-size:14px}
+.fin .fseg button{font-size:13px}
+.fin .fcoll{font-size:12px;line-height:1.2;display:flex;flex-direction:column;align-items:center}
+.fin .fcoll small{font-size:10.5px;color:var(--muted);font-weight:400}
+.fin .ftp{font-size:13px}
+.fin .fcn{font-size:14px}
+.fin .fhelp ol{gap:10px;line-height:1.6}
+.fin .fimport p{font-size:13px}
+#fTip{font-size:13px}
+@media (max-width:600px){
+  .fin{font-size:15px}
+  .fin .fch h3{font-size:17px}
+  .fin .fcard h4{font-size:15px}
+  .fin .fsub{font-size:16px}
+  .fin .ftile{padding:10px 12px;gap:2px}
+  .fin .ftile span{font-size:12.5px;line-height:1.3}
+  .fin .ftile b,.fin .fsalt input{font-size:20px}
+  .fin .fl span{font-size:13px}
+  .fin .fl input,.fin .fl select,.fin .fadd input,.fin .fcn,.fin .fpin{font-size:16px;height:40px}
+  .fin .fpin{height:34px}
+  .fin .fpri,.fin .fsec,.fin .fdel{font-size:15px}
+  .fin .fpri{height:44px}
+  .fin .fc small,.fin .fd{font-size:13px}
+  .fin .fbar,.fin .flegend{font-size:14px}
+  .fin .flegend small,.fin .flegend.small,.fin .fnote{font-size:12.5px}
+  .fin .ft,.fin .ft td{font-size:14px;padding:8px 6px}
+  .fin .ft th{font-size:12px;padding:8px 6px}
+  .fin .fseg button{font-size:13px;padding:6px 10px}
+  .fin .fcols{grid-template-columns:repeat(var(--n),minmax(34px,1fr));height:150px}
+  .fin .fcoll{font-size:11.5px}
+  .fin .ftp{font-size:12.5px}
+}
 </style>
 </head>
 <body data-tab="notes">
@@ -850,7 +936,7 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
       <button class="nb arrow" id="prev" title="Предыдущий месяц">‹</button>
       <button class="nb" id="todayBtn">Сегодня</button>
       <button class="nb arrow" id="next" title="Следующий месяц">›</button>
-      <span class="sp"></span>
+      <div class="mpills" id="mPills" role="tablist" aria-label="Месяцы"></div>
       <span id="cstatus"></span>
     </div>
     <div class="wd" id="wd"><div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div class="wk">Сб</div><div class="wk">Вс</div></div>
@@ -999,17 +1085,41 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
   };
   showTheme();
   // months slide in the direction you move
-  const slide = (btns, target) => btns.forEach(([id, dx]) => {
-    const b = document.getElementById(id); if (!b) return;
-    b.addEventListener('click', () => setTimeout(() => {
-      const el = document.querySelector(target);
-      if (el && el.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches)
-        el.animate([{opacity: .35, transform: `translateX(${dx}px)`}, {opacity: 1, transform: 'none'}], {duration: 260, easing: 'cubic-bezier(.2,.7,.2,1)'});
-    }, 0));
-  });
-  slide([['prev', -14], ['next', 14], ['todayBtn', 0]], '#grid');
-  addEventListener('load', () => slide([['fPrev', -14], ['fNext', 14], ['fToday', 0]], '#fKpi'));
-  // flip months with the mouse wheel or a sideways swipe
+  const calm = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const EASE = 'cubic-bezier(.22,.8,.24,1)';
+  window.slideIn = (sel, dx) => {
+    const el = document.querySelector(sel);
+    if (el && el.animate && !calm()) el.animate([{opacity: .2, transform: `translateX(${dx}px)`}, {opacity: 1, transform: 'none'}], {duration: 340, easing: EASE});
+  };
+  [['prev', -24], ['next', 24], ['todayBtn', 0]].forEach(([id, dx]) => document.getElementById(id).addEventListener('click', () => setTimeout(() => slideIn('#grid', dx), 0)));
+  // month plaques instead of ‹ Сегодня ›: a strip that keeps the open month in the middle
+  const MS = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+  const ymNext = ym => { let [y, m] = ym.split('-').map(Number); if (++m > 12) { m = 1; y++; } return y + '-' + String(m).padStart(2, '0'); };
+  const centre = (box, smooth) => {
+    const el = box.querySelector('.mp.on'); if (!el || !box.clientWidth) return;
+    box.scrollTo({left: el.offsetLeft - (box.clientWidth - el.offsetWidth) / 2, behavior: smooth && !calm() ? 'smooth' : 'auto'});
+  };
+  window.monthPills = (box, from, to, cur, now, pick) => {
+    const key = from + '|' + to + '|' + now, fresh = box.dataset.k !== key;
+    if (fresh) {
+      box.dataset.k = key; box.innerHTML = '';
+      for (let ym = from, i = 0; ym <= to; ym = ymNext(ym), i++) {
+        const [y, m] = ym.split('-'), b = document.createElement('button');
+        b.type = 'button'; b.className = 'mp' + (ym === now ? ' now' : ''); b.dataset.ym = ym;
+        b.innerHTML = MS[m - 1] + (m === '01' || i === 0 ? ` <small>${y}</small>` : '');
+        b.title = ym === now ? 'Текущий месяц' : '';
+        box.appendChild(b);
+      }
+      box.onclick = e => { const b = e.target.closest('.mp'); if (b) box.pick(b.dataset.ym); };
+    }
+    box.pick = pick;
+    box.querySelectorAll('.mp').forEach(b => b.classList.toggle('on', b.dataset.ym === cur));
+    centre(box, !fresh);
+  };
+  const recentre = () => setTimeout(() => document.querySelectorAll('.mpills').forEach(b => centre(b, false)), 30);
+  document.getElementById('tabs').addEventListener('click', recentre);
+  addEventListener('resize', recentre); addEventListener('load', recentre);
+  // flip months with the mouse wheel
   const grid = document.getElementById('grid');
   const flip = d => document.getElementById(d > 0 ? 'next' : 'prev').click();
   const canScroll = d => {
@@ -1031,13 +1141,66 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
     acc += d;
     if (Math.abs(acc) >= 50) { flip(acc); acc = 0; lock = now + 450; }
   }, {passive: false});
-  let t0 = null;
-  grid.addEventListener('touchstart', e => { const t = e.touches[0]; t0 = e.touches.length === 1 ? {x: t.clientX, y: t.clientY} : null; }, {passive: true});
-  grid.addEventListener('touchend', e => {
-    if (!t0) return;
-    const t = e.changedTouches[0], dx = t.clientX - t0.x, dy = t.clientY - t0.y; t0 = null;
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) flip(-dx);
-  }, {passive: true});
+  // ...and with a finger: the month follows it, then the next one glides in
+  const swipe = (el, opts) => {
+    let s = null;
+    el.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1 || (opts.ok && !opts.ok(e))) { s = null; return; }
+      const t = e.touches[0]; s = {x: t.clientX, y: t.clientY, t: Date.now(), mode: 0, dx: 0};
+    }, {passive: true});
+    el.addEventListener('touchmove', e => {
+      if (!s) return;
+      const t = e.touches[0], dx = t.clientX - s.x, dy = t.clientY - s.y;
+      if (!s.mode) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        s.mode = Math.abs(dx) > Math.abs(dy) * 1.2 && (!opts.dir || opts.dir(dx)) ? 1 : -1;
+        if (s.mode === 1) opts.start && opts.start();
+      }
+      if (s.mode !== 1) return;
+      e.preventDefault(); s.dx = dx; s.v = dx / Math.max(1, Date.now() - s.t); opts.move(dx);
+    }, {passive: false});
+    const end = () => { if (s && s.mode === 1) opts.end(s.dx, s.v || 0); s = null; };
+    el.addEventListener('touchend', end); el.addEventListener('touchcancel', end);
+  };
+  swipe(grid, {
+    move: dx => { grid.style.transform = `translateX(${dx}px)`; grid.style.opacity = 1 - Math.min(.5, Math.abs(dx) / grid.clientWidth * .6); },
+    end: (dx, v) => {
+      const W = grid.clientWidth, go = Math.abs(dx) > W * .22 || (Math.abs(v) > .45 && Math.abs(dx) > 40), dir = dx < 0 ? 1 : -1;
+      const from = {transform: `translateX(${dx}px)`, opacity: grid.style.opacity || 1};
+      grid.style.transform = grid.style.opacity = '';
+      if (!go || calm()) { if (go) calShift(dir); else grid.animate([from, {transform: 'none', opacity: 1}], {duration: 260, easing: EASE}); return; }
+      grid.animate([from, {transform: `translateX(${-dir * W * .5}px)`, opacity: 0}], {duration: 150, easing: 'cubic-bezier(.4,0,1,1)'}).onfinish = () => {
+        calShift(dir);
+        grid.animate([{transform: `translateX(${dir * W * .35}px)`, opacity: 0}, {transform: 'none', opacity: 1}], {duration: 320, easing: EASE});
+      };
+    }
+  });
+  // notes list on phones: pull it out from the left with a finger, push it back the same way
+  const aside = document.querySelector('#appNotes aside'), scrim = document.getElementById('scrim'), notesMain = document.querySelector('#appNotes main');
+  const phone = () => innerWidth <= 760;
+  const hScroll = t => { for (let el = t; el && el !== notesMain; el = el.parentElement) if (el.scrollWidth > el.clientWidth + 2 && /auto|scroll/.test(getComputedStyle(el).overflowX)) return true; return false; };
+  const drawer = open => {
+    let w = 0;
+    return {
+      ok: e => phone() && document.body.classList.contains('side') === open && !(open ? false : hScroll(e.target)),
+      dir: dx => open ? dx < 0 : dx > 0,
+      start: () => { w = aside.offsetWidth; aside.style.transition = 'none'; scrim.style.display = 'block'; scrim.style.transition = 'none'; },
+      move: dx => { const x = Math.max(-w, Math.min(0, open ? dx : dx - w)); aside.style.transform = `translateX(${x}px)`; scrim.style.opacity = 1 + x / w; },
+      end: (dx, v) => {
+        const x = Math.max(-w, Math.min(0, open ? dx : dx - w));
+        const show = open ? !(x < -w * .3 || v < -.4) : (x > -w * .7 || v > .4);
+        aside.style.transition = scrim.style.transition = '';
+        requestAnimationFrame(() => {
+          document.body.classList.toggle('side', show);
+          aside.style.transform = ''; scrim.style.opacity = show ? '1' : '0';
+          setTimeout(() => { scrim.style.display = scrim.style.opacity = ''; }, 330);
+        });
+      }
+    };
+  };
+  swipe(notesMain, drawer(false));
+  swipe(aside, drawer(true));
+  swipe(scrim, drawer(true));
   // draggable border between the month and the day panel (computer only)
   const split = document.getElementById('split'), app = split.parentElement;
   const setPW = w => {
@@ -2189,6 +2352,13 @@ function renderGrid() {
   $('#mtitle').innerHTML = '';
   $('#mtitle').append(MONTHS[view.m] + ' ');
   const yr = document.createElement('span'); yr.textContent = view.y; $('#mtitle').append(yr);
+  const vym = view.y + '-' + String(view.m + 1).padStart(2, '0'), tn = new Date(), nym = tn.getFullYear() + '-' + String(tn.getMonth() + 1).padStart(2, '0');
+  monthPills($('#mPills'), (view.y - 1) + '-01', (view.y + 1) + '-12', vym, nym, ym => {
+    if (ym === vym) return;
+    const [y, m] = ym.split('-').map(Number), n = (y - view.y) * 12 + (m - 1 - view.m);
+    if (ym === nym) select(todayS()); else shiftMonth(n);
+    slideIn('#grid', n > 0 ? 24 : -24);
+  });
   const first = new Date(view.y, view.m, 1);
   const off = (first.getDay() + 6) % 7;
   const dim = new Date(view.y, view.m + 1, 0).getDate();
@@ -2244,6 +2414,7 @@ function shiftMonth(n) {
   renderAll();
 }
 $('#fab').onclick = () => { $('#addBtn').click(); $('#panel').scrollIntoView({behavior: 'smooth', block: 'start'}); };
+window.calShift = shiftMonth;
 $('#prev').onclick = () => shiftMonth(-1);
 $('#next').onclick = () => shiftMonth(1);
 $('#todayBtn').onclick = () => select(todayS());

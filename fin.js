@@ -165,6 +165,7 @@ root.innerHTML = `
     <button class="nb arrow" id="fPrev" title="Предыдущий месяц">‹</button>
     <button class="nb" id="fToday">Сегодня</button>
     <button class="nb arrow" id="fNext" title="Следующий месяц">›</button>
+    <div class="mpills" id="fPills" aria-label="Месяцы"></div>
   </div>
   <div class="fkpi" id="fKpi"></div>
   <div class="fgrid">
@@ -218,7 +219,7 @@ root.innerHTML = `
         <li><b>Категория.</b> Выбирается из списка. Еду и мелкие ежедневные покупки добавлять не нужно: раздел рассчитан на заметные расходы.</li>
         <li><b>Тип.</b> «Обязательный» — жильё, КУ, кредитная карта и другие необходимые платежи. «Нерегулярный» — поездки, лечение, крупные покупки и т.п. Подставляется из справочника, но его можно поменять.</li>
         <li><b>Аналитика.</b> Считается сама: расходы, остаток от зарплаты, доля зарплаты, количество операций и средний чек. Зарплату за конкретный месяц можно поменять в карточке «Зарплата».</li>
-        <li><b>Месяцы.</b> Стрелки ‹ › листают месяцы. В «Обзоре по месяцам» можно смотреть последние 6 или 12 месяцев либо всё время с ноября 2026; период растёт сам.</li>
+        <li><b>Месяцы.</b> Нажмите на плашку месяца вверху, чтобы открыть его; текущий месяц отмечен точкой. В «Обзоре по месяцам» можно смотреть последние 6 или 12 месяцев либо всё время с ноября 2026; период растёт сам.</li>
         <li><b>План обязательных расходов.</b> В таблице «План / факт» впишите план. Он действует и на следующие месяцы, пока вы его не поменяете (такие цифры показаны бледнее). Изменение в месяце действует с этого месяца. «Факт» считается по внесённым расходам.</li>
         <li><b>Справочник.</b> Здесь зарплата по умолчанию и категории: их можно переименовать, поменять тип, добавить или удалить.</li>
       </ol>
@@ -234,6 +235,12 @@ function render() {
   const st = stats(cur);
   const [y, m] = cur.split('-');
   $('fTitle').innerHTML = MONTHS[+m - 1] + ' <span>' + y + '</span>';
+  const ex = expenses().map(x => x.date.slice(0, 7)).sort(), now = ymNow();
+  const from = [ex[0] || START, START].sort()[0], to = [ymAdd(now, 12), ymAdd(cur, 6), ex[ex.length - 1] || START].sort().pop();
+  if (window.monthPills) monthPills($('fPills'), from, to, cur, now, ym => {
+    if (ym === cur) return;
+    const dir = ym > cur ? 24 : -24; cur = ym; resetForm(); render(); window.slideIn && slideIn('#fKpi', dir);
+  });
   renderKpi(st); renderForm(); renderList(st); renderCats(st); renderTypes(st); renderPlan(st);
   renderOverview(); renderMatrix(); renderRef();
 }
@@ -323,7 +330,7 @@ function renderPlan(st) {
 }
 function renderOverview() {
   const months = periodMonths(), now = ymNow();
-  const S2 = months.map(stats), past = S2.filter(s => s.ym <= now);
+  const S2 = months.map(stats), last = S2.filter(s => s.count).map(s => s.ym).pop() || '', past = S2.filter(s => s.ym <= (last > now ? last : now));
   const total = S2.reduce((a, s) => a + s.total, 0), cnt = S2.reduce((a, s) => a + s.count, 0);
   const avgM = past.length ? past.reduce((a, s) => a + s.total, 0) / past.length : 0;
   const avgSh = past.length ? past.reduce((a, s) => a + s.share, 0) / past.length : 0;
@@ -336,7 +343,7 @@ function renderOverview() {
   $('fChart').innerHTML = `<div class="fcols" style="--n:${S2.length}">${S2.map(s => `
     <button class="fcol${s.ym === cur ? ' on' : ''}" data-ym="${s.ym}" data-tip="${ymLabel(s.ym)}: ${rub(s.total)} · ${pct(s.share)} зарплаты">
       <span class="fcolp"><i class="fsl" style="bottom:${s.sal / max * 100}%"></i><i class="fbv2" style="height:${s.total / max * 100}%"></i></span>
-      <span class="fcoll">${ymShort(s.ym)}</span></button>`).join('')}</div>
+      <span class="fcoll">${MON_S[+s.ym.slice(5) - 1]}<small>${s.ym.slice(2, 4)}</small></span></button>`).join('')}</div>
     <div class="flegend small"><span><i class="fbk"></i>Расходы</span><span><i class="salk"></i>Зарплата</span></div>`;
   const rows = S2.map(s => `<tr data-ym="${s.ym}" class="${s.ym === cur ? 'on' : ''}"><td>${ymLabel(s.ym)}</td><td>${rub(s.total)}</td><td class="${s.rest < 0 ? 'over' : ''}">${rub(s.rest)}</td><td>${pct(s.share)}</td><td>${s.count}</td><td>${rub(s.avg)}</td><td>${rub(s.byType[OBL])}</td><td>${rub(s.byType[IRR])}</td></tr>`).join('');
   const rest = S2.reduce((a, s) => a + s.rest, 0);
