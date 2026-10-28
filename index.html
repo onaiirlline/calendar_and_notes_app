@@ -563,6 +563,14 @@ table{font-size:13px}
 #lbar a{color:var(--accent);text-decoration:none}
 #lbar button:hover,#lbar a:hover{background:var(--hover)}
 @media (pointer:coarse){#fbar button{min-width:38px;height:38px;font-size:16px}}
+
+/* copy whole note */
+#doc.multisel .btools,#doc.multisel .tctl{visibility:hidden}
+#doc.multisel ::selection{background:color-mix(in srgb,var(--accent) 35%,transparent)}
+#doc.multisel .ed{cursor:text}
+#toast{position:fixed;left:50%;bottom:calc(var(--tabs-h,0px) + 24px);transform:translate(-50%,12px);background:var(--paper);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:8px 14px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:80;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (min-width:761px){#toast{bottom:24px}}
 </style>
 </head>
 <body data-tab="notes">
@@ -589,7 +597,7 @@ table{font-size:13px}
   <div class="side-f">
     <label id="ruledBtn"><span class="sw" id="ruledSw"></span>Линии между строками</label>
     <button id="themeBtn">◐ <span id="themeLbl">Тема: авто</span></button>
-    <button id="copyBtn">⧉ Копировать как текст</button>
+    <button id="copyBtn">⧉ Копировать заметку целиком</button>
     <button id="mdBtn">↓ Скачать заметку .md</button>
     <button id="backupBtn">↓ Резервная копия всех</button>
     <button id="importBtn">↑ Загрузить копию</button>
@@ -619,7 +627,8 @@ table{font-size:13px}
     <div class="keys">
       <kbd>/</kbd> меню блоков · <kbd>[]</kbd> чек-лист · <kbd>-</kbd> список · <kbd>#</kbd> заголовок · <kbd>&gt;</kbd> важное · <kbd>---</kbd> линия<br>
       <kbd>Ctrl</kbd>+<kbd>Enter</kbd> отметить пункт · <kbd>Tab</kbd> вложить · <kbd>Alt</kbd>+<kbd>↑↓</kbd> переставить строку · в таблице <kbd>Tab</kbd> следующая ячейка<br>
-      Выделите текст для оформления · <kbd>Ctrl</kbd>+<kbd>B</kbd> жирный · <kbd>I</kbd> курсив · <kbd>U</kbd> подчёркнутый · <kbd>Shift</kbd>+<kbd>X</kbd> зачёркнутый · <kbd>Shift</kbd>+<kbd>H</kbd> маркер · <kbd>K</kbd> ссылка
+      Выделите текст для оформления · <kbd>Ctrl</kbd>+<kbd>B</kbd> жирный · <kbd>I</kbd> курсив · <kbd>U</kbd> подчёркнутый · <kbd>Shift</kbd>+<kbd>X</kbd> зачёркнутый · <kbd>Shift</kbd>+<kbd>H</kbd> маркер · <kbd>K</kbd> ссылка<br>
+      Мышкой можно выделять сразу несколько строк и копировать, вырезать, удалять · <kbd>Ctrl</kbd>+<kbd>A</kbd> дважды выделяет всю заметку
     </div>
   </div>
 </main>
@@ -1116,6 +1125,7 @@ function renderMeta() {
   if (checks.length) {
     const c = document.createElement('span'); c.textContent = `✓ ${done} из ${checks.length}`; m.appendChild(c);
   }
+  const cp = document.createElement('button'); cp.textContent = 'копировать всё'; cp.title = 'Скопировать заметку целиком с оформлением'; cp.onclick = () => copyNote(n); m.appendChild(cp);
   if (done) {
     const b = document.createElement('button'); b.textContent = 'убрать выполненные';
     b.onclick = () => { n.blocks = n.blocks.filter(x => !(x.type === 'check' && x.checked)); ensureNotEmpty(); rr(); };
@@ -1344,6 +1354,10 @@ function onKeyEd(e, ed, b) {
     const k = e.key.toLowerCase(), code = e.code;
     const act = code === 'KeyB' ? 'b' : code === 'KeyI' ? 'i' : code === 'KeyU' ? 'u' : code === 'KeyK' ? 'a' : (e.shiftKey && code === 'KeyX') ? 's' : (e.shiftKey && code === 'KeyH') ? 'mark' : null;
     if (act) { e.preventDefault(); fmt1(act); return; }
+    if (e.code === 'KeyA') {
+      const sel = getSelection(), all = !ed.textContent || (sel.rangeCount && sel.toString().length >= ed.textContent.length);
+      if (all) { e.preventDefault(); selectAllNote(); return; }
+    }
   }
   if (menu.open) {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
@@ -1638,10 +1652,186 @@ async function download(name, text, type) {
 }
 const safeName = s => (s || 'заметка').replace(/[\\/:*?"<>|]+/g, ' ').trim().slice(0, 60) || 'заметка';
 $('#mdBtn').onclick = () => download(safeName(label(note())) + '.md', toMd(note()), 'text/markdown');
-$('#copyBtn').onclick = async () => {
-  try { await navigator.clipboard.writeText(toMd(note())); setStatus('Скопировано'); }
-  catch (e) { setStatus('Не удалось скопировать'); }
-};
+/* copy a whole note: formatted (html) for Word / Google Docs / Notes, plain text for messengers */
+function noteHtml(n) {
+  const o = [], esc = escH;
+  if (n.title) o.push('<h1>' + esc(n.title) + '</h1>');
+  let list = null;
+  const close = () => { if (list) { o.push('</' + list + '>'); list = null; } };
+  n.blocks.forEach(b => {
+    const pad = b.ind ? ' style="margin-left:' + b.ind * 24 + 'px"' : '';
+    if (b.type === 'bullet') { if (list !== 'ul') { close(); o.push('<ul>'); list = 'ul'; } o.push('<li' + pad + '>' + htmlOf(b) + '</li>'); return; }
+    close();
+    switch (b.type) {
+      case 'h': o.push('<h2>' + htmlOf(b) + '</h2>'); break;
+      case 'check': o.push('<p' + pad + '>' + (b.checked ? '☑ <s>' + htmlOf(b) + '</s>' : '☐ ' + htmlOf(b)) + '</p>'); break;
+      case 'quote': o.push('<blockquote style="border-left:3px solid #ff4700;margin:8px 0;padding:4px 12px">' + htmlOf(b) + '</blockquote>'); break;
+      case 'divider': o.push('<hr>'); break;
+      case 'table':
+        o.push('<table border="1" cellpadding="6" style="border-collapse:collapse">' + b.rows.map((r, i) => '<tr>' + r.map(x => (i ? '<td>' : '<th>') + esc(x).replace(/\n/g, '<br>') + (i ? '</td>' : '</th>')).join('') + '</tr>').join('') + '</table>'); break;
+      default: o.push(b.text ? '<p' + pad + '>' + htmlOf(b) + '</p>' : '<p><br></p>');
+    }
+  });
+  close();
+  return o.join('');
+}
+function noteText(n) {
+  const out = [];
+  if (n.title) out.push(n.title, '');
+  n.blocks.forEach(b => {
+    const ind = '    '.repeat(b.ind || 0);
+    switch (b.type) {
+      case 'h': out.push('', b.text); break;
+      case 'check': out.push(ind + (b.checked ? '☑ ' : '☐ ') + b.text); break;
+      case 'bullet': out.push(ind + '• ' + b.text); break;
+      case 'quote': out.push('❗ ' + b.text); break;
+      case 'divider': out.push('———'); break;
+      case 'table': out.push(...b.rows.map(r => r.map(x => x.replace(/\n/g, ' ')).join('\t'))); break;
+      default: out.push(ind + b.text);
+    }
+  });
+  return out.join('\n').replace(/^\n+/, '').replace(/\n{3,}/g, '\n\n');
+}
+function toast(t) {
+  let el = document.getElementById('toast');
+  if (!el) { el = document.createElement('div'); el.id = 'toast'; document.body.appendChild(el); }
+  el.textContent = t; el.classList.add('on');
+  clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 1600);
+}
+async function copyNote(n = note()) {
+  const html = noteHtml(n), text = noteText(n);
+  try {
+    if (window.ClipboardItem && navigator.clipboard.write) {
+      await navigator.clipboard.write([new ClipboardItem({'text/html': new Blob([html], {type: 'text/html'}), 'text/plain': new Blob([text], {type: 'text/plain'})})]);
+    } else await navigator.clipboard.writeText(text);
+    toast('Заметка скопирована');
+  } catch (e) {
+    // fallback for browsers without clipboard API access
+    const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('Заметка скопирована'); } catch (er) { toast('Не удалось скопировать'); }
+    ta.remove();
+  }
+}
+$('#copyBtn').onclick = () => copyNote();
+/* ---------- selection across several lines, like a text editor ----------
+   Each line is its own editable, and browsers cannot select across editables.
+   While the mouse drags past the line it started in (or on Ctrl+A twice), the lines
+   become read-only so the selection can span them; copy / cut / delete / typing then
+   act on the selected part of the note. */
+let multi = false, dragFrom = null;
+function setMulti(on) {
+  if (multi === on) return;
+  multi = on; doc.classList.toggle('multisel', on);
+  if (on && doc.contains(document.activeElement)) document.activeElement.blur();
+  doc.querySelectorAll('.ed').forEach(ed => ed.contentEditable = on ? 'false' : 'true');
+  doc.querySelectorAll('td').forEach(td => on ? td.contentEditable = 'false' : setEditable(td));
+}
+function caretAt(x, y) {
+  if (document.caretPositionFromPoint) { const p = document.caretPositionFromPoint(x, y); return p && {node: p.offsetNode, off: p.offset}; }
+  const r = document.caretRangeFromPoint && document.caretRangeFromPoint(x, y); return r && {node: r.startContainer, off: r.startOffset};
+}
+doc.addEventListener('mousedown', e => {
+  if (multi) { setMulti(false); }
+  if (e.button !== 0 || e.shiftKey || !e.target.closest('.ed')) { dragFrom = null; return; }
+  dragFrom = {x: e.clientX, y: e.clientY, block: e.target.closest('.block')};
+});
+document.addEventListener('mousemove', e => {
+  if (!dragFrom || !(e.buttons & 1)) return;
+  const over = document.elementFromPoint(e.clientX, e.clientY), ob = over && over.closest('#doc .block');
+  if (!multi && (!ob || ob === dragFrom.block) && Math.abs(e.clientY - dragFrom.y) < 14) return;
+  if (!multi) setMulti(true);
+  const a = caretAt(dragFrom.x, dragFrom.y), b = caretAt(e.clientX, e.clientY);
+  if (a && b && doc.contains(a.node) && doc.contains(b.node)) {
+    e.preventDefault(); dragFrom.sel = [a.node, a.off, b.node, b.off];
+    getSelection().setBaseAndExtent(...dragFrom.sel);
+  }
+});
+doc.addEventListener('dragstart', e => { if (dragFrom || multi) e.preventDefault(); });
+document.addEventListener('mouseup', () => {
+  if (!dragFrom) return; const sl = dragFrom.sel; dragFrom = null;
+  // the browser's own drag selection may still be limited to the first line: put ours back
+  if (multi && sl) { getSelection().setBaseAndExtent(...sl); setTimeout(() => { if (multi) getSelection().setBaseAndExtent(...sl); }, 0); }
+  if (multi && !sl) setMulti(false);
+});
+function selectAllNote() {
+  setMulti(true);
+  const sel = getSelection(), r = document.createRange(); r.selectNodeContents(doc);
+  sel.removeAllRanges(); sel.addRange(r);
+}
+// the selected part of the note as blocks (first / last lines cut to the selection)
+function selBlocks() {
+  const sel = getSelection(); if (!sel.rangeCount) return [];
+  const R = sel.getRangeAt(0), out = [];
+  note().blocks.forEach(b => {
+    const w = doc.querySelector(`[data-id="${b.id}"]`);
+    if (!w || !R.intersectsNode(w)) return;
+    const ed = w.querySelector('.ed');
+    if (!ed) {
+      const whole = R.comparePoint(w, 0) === 0 && R.comparePoint(w, w.childNodes.length) === 0;
+      if (whole || b.type === 'table') out.push({b, whole, part: JSON.parse(JSON.stringify(b))});
+      return;
+    }
+    const r2 = document.createRange(); r2.selectNodeContents(ed);
+    const hasS = ed.contains(R.startContainer), hasE = ed.contains(R.endContainer);
+    if (hasS) r2.setStart(R.startContainer, R.startOffset);
+    if (hasE) r2.setEnd(R.endContainer, R.endOffset);
+    const box = document.createElement('div'); box.appendChild(r2.cloneContents());
+    const part = Object.assign({}, b); setHtml(part, box.innerHTML);
+    out.push({b, ed, hasS, hasE, part, whole: !hasS && !hasE});
+  });
+  return out;
+}
+function copySel(e) {
+  const parts = selBlocks(); if (!parts.length) return false;
+  const n = {title: '', blocks: parts.map(p => p.part)};
+  e.clipboardData.setData('text/html', noteHtml(n)); e.clipboardData.setData('text/plain', noteText(n));
+  e.preventDefault(); return true;
+}
+// remove the selected part and leave the caret where it was; returns the block to continue typing in
+function deleteSel() {
+  const parts = selBlocks(), bl = note().blocks;
+  setMulti(false);
+  if (!parts.length) return null;
+  const texty = parts.filter(p => p.ed), first = texty[0], last = texty[texty.length - 1];
+  let keep = null, pos = 0;
+  if (first) {
+    const sel = getSelection(), R = sel.getRangeAt(0);
+    const head = document.createRange(); head.selectNodeContents(first.ed);
+    if (first.hasS) head.setEnd(R.startContainer, R.startOffset); else head.collapse(true);
+    const h = document.createElement('div'); h.appendChild(head.cloneContents());
+    let tail = '';
+    if (last.hasE) { const t = document.createRange(); t.selectNodeContents(last.ed); t.setStart(R.endContainer, R.endOffset); const d = document.createElement('div'); d.appendChild(t.cloneContents()); tail = d.innerHTML; }
+    keep = first.b; setHtml(keep, h.innerHTML + tail);
+    const d2 = document.createElement('div'); d2.innerHTML = h.innerHTML; pos = d2.textContent.length;
+  }
+  parts.forEach(p => {
+    if (p.b === keep) return;
+    if (!p.ed && !p.whole) return;            // a table the selection only touches stays
+    bl.splice(bl.indexOf(p.b), 1);
+  });
+  if (!bl.length) { keep = mk('text'); bl.push(keep); }
+  if (!keep) { keep = bl[Math.min(bl.length - 1, Math.max(0, bl.indexOf(parts[0].b)))]; }
+  rr(keep.id, pos);
+  return keep;
+}
+document.addEventListener('copy', e => { if (multi) { if (copySel(e)) toast('Скопировано'); } });
+document.addEventListener('cut', e => { if (multi && copySel(e)) deleteSel(); });
+document.addEventListener('keydown', e => {
+  if (!multi) return;
+  const mod = e.ctrlKey || e.metaKey;
+  if (mod && e.code === 'KeyA') { e.preventDefault(); selectAllNote(); return; }
+  if (mod && (e.code === 'KeyC' || e.code === 'KeyX')) return;   // handled by copy / cut events
+  if (['Control', 'Meta', 'Shift', 'Alt', 'CapsLock'].includes(e.key)) return;
+  if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); deleteSel(); return; }
+  if (e.key.length === 1 && !mod) {
+    e.preventDefault(); const b = deleteSel(); if (!b) return;
+    document.execCommand('insertText', false, e.key); return;
+  }
+  if (e.key === 'Enter') { e.preventDefault(); deleteSel(); return; }
+  setMulti(false);
+}, true);
+document.addEventListener('mousedown', e => { if (multi && !doc.contains(e.target)) setMulti(false); });
 $('#backupBtn').onclick = () => download('заметки-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(S, null, 1), 'application/json');
 $('#importBtn').onclick = () => $('#importFile').click();
 $('#importFile').onchange = async e => {
