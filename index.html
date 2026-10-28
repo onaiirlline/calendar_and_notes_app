@@ -249,6 +249,17 @@ body[data-tab=notes] #appCal,body[data-tab=cal] #appNotes{display:none}
 .eact .del{margin-left:auto}
 .eact .del.armed{background:#b4443a;color:#fff}
 
+.qopts{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:-4px}
+.qcol{display:flex;gap:6px;flex-wrap:wrap}
+.qcol .csw{width:16px;height:16px}
+.pill{font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--rule);color:var(--muted);white-space:nowrap}
+.pill:hover{color:var(--ink)}
+.pill.on{background:color-mix(in srgb,var(--accent) 16%,transparent);border-color:color-mix(in srgb,var(--accent) 45%,transparent);color:var(--ink)}
+.qtime{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.qtime[hidden],.f-tw[hidden]{display:none}
+.qtime input{border:1px solid var(--line);background:var(--paper);border-radius:6px;padding:3px 6px;outline:none;font-size:13px;font-variant-numeric:tabular-nums;color-scheme:dark}
+.qtime input:focus{border-color:var(--rule)}
+.f-tw{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
 .sec h3{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:6px 0 6px}
 #daynote{width:100%;border:0;border-top:1px dashed var(--line);background:transparent;outline:none;resize:none;padding:8px 0;min-height:70px;line-height:1.55;font-size:14.5px}
 #daynote::placeholder{color:var(--rule)}
@@ -505,6 +516,22 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
   .num{width:24px;height:24px;font-size:13px}
   .chip{font-size:11px;padding:1px 5px}
 }
+
+/* ===== day panel: same type as the month ===== */
+.panel{font-family:var(--font);font-size:13px}
+#dtitle{font-size:18px;font-weight:600;letter-spacing:-.005em}
+.dsub{font-size:12px}
+#quick{font-size:13px}
+.ev{padding:8px 2px 8px 10px}
+.tt{font-weight:500;font-size:13px;color:var(--body)}
+.tm{font-size:12px}
+.nt,.rp{font-size:12px}
+.sec h3{font-size:11px;letter-spacing:.08em}
+#daynote{font-size:13px}
+.up{font-size:12.5px}
+.up .ut{font-weight:400;color:var(--body)}
+.empty{font-size:13px}
+@media (pointer:coarse){#quick,#daynote,.qtime input{font-size:16px!important}.qcol{gap:8px}.qcol .csw{width:22px;height:22px}.pill{padding:5px 12px;font-size:13px}}
 </style>
 </head>
 <body data-tab="notes">
@@ -592,6 +619,11 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
     <div class="quick">
       <input id="quick" placeholder="Добавить: 15:30 Стоматолог" autocomplete="off">
       <button id="addBtn" title="Добавить с подробностями">+</button>
+    </div>
+    <div class="qopts" id="qopts">
+      <div class="qcol" id="qcol" role="radiogroup" aria-label="Цвет"></div>
+      <button class="pill on" id="qall" aria-pressed="true">Весь день</button>
+      <span class="qtime" id="qtime" hidden><input type="time" id="qfrom" aria-label="Начало"> — <input type="time" id="qto" aria-label="Конец"></span>
     </div>
     <div id="clist"></div>
     <div class="sec">
@@ -1654,7 +1686,7 @@ function editorEl(it) {
   const ed = document.createElement('div'); ed.className = 'editor';
   ed.innerHTML = `
     <input type="text" class="f-title" placeholder="Что запланировано" aria-label="Заголовок">
-    <div class="frow">Время <input type="time" class="f-time" aria-label="Начало"> — <input type="time" class="f-end" aria-label="Конец"></div>
+    <div class="frow"><button type="button" class="pill f-all">Весь день</button><span class="f-tw">Время <input type="time" class="f-time" aria-label="Начало"> — <input type="time" class="f-end" aria-label="Конец"></span></div>
     <div class="frow colors"></div>
     <div class="frow"><select class="f-rep" aria-label="Повтор"></select></div>
     <textarea class="f-note" placeholder="Пометки: адрес, что взять, ссылки…" aria-label="Пометки"></textarea>
@@ -1681,6 +1713,15 @@ function editorEl(it) {
     if (!it.time) it.end = '';
     row().querySelector('.tm').textContent = timeLabel(it);
     touch(it);
+  };
+  const allBtn = q('.f-all'), tw = q('.f-tw');
+  let allOn = !it.time;
+  const showAll = () => { allBtn.classList.toggle('on', allOn); allBtn.setAttribute('aria-pressed', allOn); tw.hidden = allOn; };
+  showAll();
+  allBtn.onclick = () => {
+    allOn = !allOn; showAll();
+    if (allOn) { q('.f-time').value = q('.f-end').value = ''; timeChanged(); renderGrid(); }
+    else q('.f-time').focus();
   };
   q('.f-time').addEventListener('change', timeChanged);
   q('.f-end').addEventListener('change', timeChanged);
@@ -1723,18 +1764,48 @@ function parseQuick(s) {
   }
   return {title: s};
 }
+let qColor = 'c1';
+try { const c = localStorage.getItem('my-app-qcolor'); if (COLORS.includes(c)) qColor = c; } catch (e) {}
+const qAll = $('#qall'), qTime = $('#qtime');
+function renderQcol() {
+  const box = $('#qcol'); box.innerHTML = '';
+  COLORS.forEach((c, i) => {
+    const b = document.createElement('button'); b.className = 'csw ' + c + (c === qColor ? ' on' : '');
+    b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', c === qColor); b.setAttribute('aria-label', 'Цвет ' + (i + 1));
+    b.onclick = () => { qColor = c; try { localStorage.setItem('my-app-qcolor', c); } catch (e) {} renderQcol(); };
+    box.appendChild(b);
+  });
+}
+renderQcol();
+function setQAll(on) {
+  qAll.classList.toggle('on', on); qAll.setAttribute('aria-pressed', on); qTime.hidden = on;
+  if (on) $('#qfrom').value = $('#qto').value = '';
+}
+qAll.onclick = () => { const on = !qAll.classList.contains('on'); setQAll(on); if (!on) $('#qfrom').focus(); };
+// fields for a new item: typed "15:30 …" wins, otherwise the picked time; colour from the picker
+function quickFields() {
+  const v = $('#quick').value.trim();
+  const f = Object.assign({color: qColor}, v ? parseQuick(v) : {});
+  if (!f.time && !qAll.classList.contains('on') && $('#qfrom').value) {
+    f.time = $('#qfrom').value;
+    const to = $('#qto').value; if (to && to > f.time) f.end = to;
+  }
+  return f;
+}
+function quickReset() { $('#quick').value = ''; setQAll(true); }
+['#qfrom', '#qto'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter' && $('#quick').value.trim()) { e.preventDefault(); $('#quick').dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter'})); } }));
 $('#quick').addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
-  const v = e.target.value.trim(); if (!v) return;
+  const v = $('#quick').value.trim(); if (!v) return;
   closeEditor();
-  newEvent(parseQuick(v));
-  e.target.value = '';
+  newEvent(quickFields());
+  quickReset();
   renderDay(); renderGrid();
 });
 $('#addBtn').onclick = () => {
   closeEditor();
-  const f = $('#quick').value.trim() ? parseQuick($('#quick').value) : {};
-  $('#quick').value = '';
+  const f = quickFields();
+  quickReset();
   const it = newEvent(f);
   open = it.id; renderDay(); renderGrid(); focusEditor();
 };
