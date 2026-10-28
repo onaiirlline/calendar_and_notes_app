@@ -390,7 +390,7 @@ textarea,select{font:inherit}
 @media (max-width:600px){
   .wd div{font-size:12px}
   .grid{grid-template-rows:repeat(var(--rows,5),minmax(104px,auto));min-height:0}
-  .day{padding:5px 2px 3px;gap:4px}
+  .day,.day.we{padding:5px 2px 3px;gap:4px}
   .num{font-size:14px;width:26px;height:26px}
   .chips{display:flex;flex-direction:column;align-items:stretch;gap:3px;padding:0}
   .chip{width:auto;height:auto;border-radius:3px;padding:2px 3px;font-size:10.5px;gap:3px;background:color-mix(in srgb,var(--cc) 34%,transparent)}
@@ -444,34 +444,66 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
   .num{font-size:13px;width:24px;height:24px}
 }
 
-/* ===== computer: compact month, scales with window and browser zoom ===== */
+/* ===== weekdays, weekend accent, spacing ===== */
+:root:root:root{--wk:#c79a92}
+.head{margin-bottom:20px}
+.wd{padding:7px 0;margin-bottom:6px;background:var(--paper);border-radius:6px}
+.wd div{font-size:12.5px;font-weight:600;color:var(--body);letter-spacing:.02em}
+.wd div.wk{color:var(--wk)}
+.wd div.now{color:var(--accent)}
+.day.we:not(.today):not(.out) .num{color:var(--wk)}
+.day.we.out .num{color:color-mix(in srgb,var(--wk) 45%,var(--bg))}
+@media (max-width:760px){.head{margin-bottom:16px}}
+@media (max-width:600px){.wd div{font-size:11.5px}.wd{padding:6px 0;margin-bottom:4px}}
+
+/* ===== computer: compact month, resizable split, scales with window and zoom ===== */
+#split{display:none}
 @media (min-width:901px){
-  .app{grid-template-columns:minmax(0,1fr) clamp(300px,25vw,380px)}
-  .cal{padding:12px clamp(16px,1.6vw,28px) 14px;overflow-y:auto}
-  .head{margin-bottom:8px}
-  #mtitle{font-size:clamp(28px,2.6vw,42px);margin-right:12px}
-  .wd{padding-bottom:6px}
-  .wd div{font-size:12px}
-  .grid{grid-template-rows:repeat(var(--rows,5),minmax(0,1fr));min-height:calc(var(--rows,5) * 92px)}
-  .day,.day.we{padding:4px 4px 3px;gap:3px}
-  .num{width:24px;height:24px;font-size:13.5px}
+  .app{grid-template-columns:minmax(0,1fr) 9px var(--pw,clamp(290px,24vw,360px))}
+  #split{display:block;cursor:col-resize;position:relative;background:var(--bg);touch-action:none;outline:none}
+  #split::before{content:"";position:absolute;top:0;bottom:0;left:4px;width:1px;background:var(--line);transition:background .15s,width .15s,left .15s}
+  #split::after{content:"";position:absolute;top:50%;left:2px;width:5px;height:36px;margin-top:-18px;border-radius:3px;background:var(--rule);opacity:0;transition:opacity .15s}
+  #split:hover::after,#split:focus-visible::after,body.dragging #split::after{opacity:1}
+  #split:hover::before,body.dragging #split::before{background:var(--accent);opacity:.6}
+  body.dragging,body.dragging *{cursor:col-resize!important;user-select:none!important}
+  .panel{border-left:0}
+  .cal{container-type:inline-size;padding:12px clamp(14px,1.4vw,24px) 14px;overflow-y:auto}
+  #mtitle{font-size:clamp(24px,2.1vw,34px);margin-right:10px}
+  .head .nb{font-size:13px}
+  .wd div{font-size:11.5px}
+  .wd{padding:6px 0}
+  .grid{grid-template-rows:repeat(var(--rows,5),minmax(0,1fr));min-height:calc(var(--rows,5) * 84px)}
+  .day,.day.we{padding:4px 3px 3px;gap:3px}
+  .num{width:22px;height:22px;font-size:12.5px}
   .chips{gap:2px}
-  .chip{font-size:11.5px;padding:1px 5px;line-height:1.4}
-  .chip .ck{width:10px;height:10px}
-  .chip .ck::after{left:2.2px;top:.9px;width:2.6px;height:4.6px}
-  .more{font-size:11px}
+  .chip{font-size:10.5px;padding:1px 4px;line-height:1.4;gap:4px}
+  .chip .ck{width:9px;height:9px}
+  .chip .ck::after{left:1.8px;top:.6px;width:2.5px;height:4px}
+  .more{font-size:10px}
   .dn{top:6px;right:5px}
+  #dtitle{font-size:19px}
+  .panel{font-size:14px}
+}
+/* calendar gets narrower as the split moves: shrink everything */
+@container (max-width:760px){
+  #mtitle{font-size:24px}
+  .chip{font-size:9.5px;padding:1px 3px}
+  .chip b{display:none}
+  .num{width:20px;height:20px;font-size:11.5px}
+  .wd div{font-size:10.5px}
+}
+@container (max-width:560px){
+  .grid{min-height:calc(var(--rows,5) * 70px)}
+  .chip{font-size:9px}
+  .chip .ck{display:none}
+  .head .nb{padding-left:6px;padding-right:6px}
 }
 @media (min-width:601px) and (max-width:900px){
-  #mtitle{font-size:32px}
-  .grid{grid-template-rows:repeat(var(--rows,5),minmax(100px,auto));min-height:0}
+  #mtitle{font-size:30px}
+  .grid{grid-template-rows:repeat(var(--rows,5),minmax(96px,auto));min-height:0}
   .day,.day.we{padding:4px 4px 3px;gap:3px}
-  .num{width:24px;height:24px;font-size:13.5px}
-  .chip{font-size:11.5px;padding:1px 5px}
-}
-@media (min-width:1700px){
-  .num{width:26px;height:26px;font-size:14.5px}
-  .chip{font-size:12.5px}
+  .num{width:24px;height:24px;font-size:13px}
+  .chip{font-size:11px;padding:1px 5px}
 }
 </style>
 </head>
@@ -547,10 +579,11 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
       <span class="sp"></span>
       <span id="cstatus"></span>
     </div>
-    <div class="wd" id="wd"><div>П</div><div>В</div><div>С</div><div>Ч</div><div>П</div><div>С</div><div>В</div></div>
+    <div class="wd" id="wd"><div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div class="wk">Сб</div><div class="wk">Вс</div></div>
     <div class="grid" id="grid"></div>
     <button id="fab" aria-label="Новое дело">+</button>
   </section>
+  <div id="split" role="separator" aria-orientation="vertical" aria-label="Изменить ширину календаря" title="Потяните, чтобы изменить ширину" tabindex="0"></div>
   <div class="panel" id="panel">
     <div>
       <h2 id="dtitle"></h2>
@@ -676,6 +709,28 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
   tabsH(); addEventListener('resize', tabsH); addEventListener('orientationchange', () => setTimeout(tabsH, 300));
   addEventListener('hashchange', () => { const t = TABS[location.hash.slice(1)]; if (t) show(t); });
   document.getElementById('appTheme').onclick = () => document.getElementById('themeBtn').click();
+  // draggable border between the month and the day panel (computer only)
+  const split = document.getElementById('split'), app = split.parentElement;
+  const setPW = w => {
+    const W = app.clientWidth, v = Math.round(Math.max(260, W > 900 ? Math.min(W - 420, w) : w));
+    app.style.setProperty('--pw', v + 'px'); return v;
+  };
+  try { const w = +localStorage.getItem('my-app-pw'); if (w) setPW(w); } catch (e) {}
+  const save = () => { try { localStorage.setItem('my-app-pw', parseInt(app.style.getPropertyValue('--pw'))); } catch (e) {} };
+  split.addEventListener('pointerdown', e => {
+    e.preventDefault(); split.setPointerCapture(e.pointerId); document.body.classList.add('dragging');
+    const right = app.getBoundingClientRect().right;
+    const move = ev => setPW(right - ev.clientX - 4);
+    const up = () => { split.removeEventListener('pointermove', move); split.removeEventListener('pointerup', up); split.removeEventListener('pointercancel', up); document.body.classList.remove('dragging'); save(); };
+    split.addEventListener('pointermove', move); split.addEventListener('pointerup', up); split.addEventListener('pointercancel', up);
+  });
+  split.addEventListener('dblclick', () => { app.style.removeProperty('--pw'); try { localStorage.removeItem('my-app-pw'); } catch (e) {} });
+  split.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault(); e.stopPropagation();
+    setPW(document.getElementById('panel').offsetWidth + (e.key === 'ArrowLeft' ? 40 : -40)); save();
+  });
+  addEventListener('resize', () => { const v = parseInt(app.style.getPropertyValue('--pw')); if (v) setPW(v); });
 })();
 </script>
 <script>
