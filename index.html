@@ -429,7 +429,7 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
   #ask,#login{padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px))}
 }
 @media (max-width:600px){
-  #fab{bottom:calc(76px + env(safe-area-inset-bottom, 0px))}
+  #fab{bottom:calc(var(--tabs-h, 90px) + 20px);width:54px;height:54px;font-size:28px;box-shadow:0 0 0 1px #451e0e,0 6px 20px rgba(0,0,0,.45)}
   .ev{padding-top:11px;padding-bottom:11px}
   .ev input[type=checkbox]{width:20px;height:20px;margin-top:1px}
   .b-check input{width:20px;height:20px}
@@ -635,6 +635,8 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
   if (!start) { try { start = localStorage.getItem('my-app-tab'); } catch (e) {} }
   show(start === 'cal' ? 'cal' : 'notes');
   document.querySelectorAll('.tab').forEach(b => b.onclick = () => show(b.dataset.tab, true));
+  const tabsH = () => document.documentElement.style.setProperty('--tabs-h', document.getElementById('tabs').offsetHeight + 'px');
+  tabsH(); addEventListener('resize', tabsH); addEventListener('orientationchange', () => setTimeout(tabsH, 300));
   addEventListener('hashchange', () => { const t = TABS[location.hash.slice(1)]; if (t) show(t); });
   document.getElementById('appTheme').onclick = () => document.getElementById('themeBtn').click();
 })();

@@ -1,5 +1,5 @@
 // Офлайн-режим: сначала пробуем сеть (чтобы обновления приходили сразу), без сети берём из кэша.
-const CACHE = 'my-app-v4';
+const CACHE = 'my-app-v5';
 const SHELL = [
   './', './index.html', './config.js', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable.png', './apple-touch-icon.png', './favicon.png',
