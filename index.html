@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#0f0d0a">
+<script>try { if (localStorage.getItem('my-app-theme') === 'light') { document.documentElement.classList.add('light'); document.querySelector('meta[name=theme-color]').content = '#faf9f7'; } } catch (e) {}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -124,7 +125,7 @@ td:focus{box-shadow:inset 0 0 0 2px var(--accent)}
 
 @media (hover:none){.btools{opacity:.6}.tctl{opacity:1}}
 @media (max-width:760px){
-  aside{position:fixed;left:0;top:0;z-index:30;transform:translateX(-100%);transition:transform .2s}
+  aside{position:fixed;left:0;top:0;z-index:30;transform:translateX(-100%);transition:transform .32s cubic-bezier(.2,.7,.2,1),box-shadow .32s}
   body.side aside{transform:none;box-shadow:0 0 40px rgba(0,0,0,.15)}
   body.side #scrim{display:block;position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.2)}
   #burger{display:block}
@@ -171,7 +172,6 @@ body:not([data-tab=fin]) #appFin,body[data-tab=fin] #appCal,body[data-tab=fin] #
   .tab{flex:1;flex-direction:column;gap:2px;font-size:11.5px;padding:6px 0;background:none!important}
   .tab.on{color:var(--accent);font-weight:600}
   .tabs .grow{display:none}
-  #appTheme{display:none}
   #acct{flex:1;flex-direction:column;gap:2px;font-size:11.5px;padding:6px 0;background:none!important}
 }
 
@@ -360,7 +360,7 @@ tr:first-child td{background:var(--paper);color:var(--ink)}
 textarea,select{font:inherit}
 @media (hover:none){.btools{opacity:0!important}.block:focus-within>.btools{opacity:1!important}}
 @media (max-width:760px){#status{display:none}}
-#themeBtn,#appTheme{display:none!important}
+#themeBtn{display:none!important}
 @media (max-width:760px){
   .tab{border-radius:0;padding:6px 0}
   .tab.on{background:none;box-shadow:none;color:var(--accent)}
@@ -661,6 +661,8 @@ table{font-size:13px}
 .fmat .z{color:var(--rule)}
 .fpin{font:inherit;width:96px;text-align:right;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--ink);outline:none}
 .fpin:focus{border-color:var(--accent)}
+.fpin.inh{color:var(--muted);border-style:dashed}
+.fnote{margin-left:auto;font-size:11.5px;color:var(--muted)}
 .fseg{display:flex;gap:2px;margin-left:auto;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:2px}
 .fseg button{font-size:12px;padding:4px 10px;border-radius:4px;color:var(--muted)}
 .fseg button.on{background:var(--hover);color:var(--ink);box-shadow:inset 0 0 0 1px var(--rule)}
@@ -715,7 +717,7 @@ table{font-size:13px}
   .fbv{min-width:0}
   .fcols{height:130px;grid-template-columns:repeat(var(--n),minmax(30px,1fr))}
   .fseg{margin-left:0}
-  .fch2 .flink{margin-left:0}
+  .fch2 .fnote{margin-left:0}
   .fpin{width:76px;padding:1px 5px;height:30px}
   .ft td{font-size:12px;padding:6px 6px}
   #fPlan td:first-child{white-space:normal;min-width:84px}
@@ -724,6 +726,36 @@ table{font-size:13px}
   .fbar{font-size:12px}
 }
 @media (pointer:coarse){.fl input,.fl select,.fadd input,.fpin,.fsalt input,.fcn{font-size:16px!important}}
+
+/* ===== light theme (switch next to «Аккаунт») ===== */
+#appTheme{display:flex;align-items:center;gap:6px;color:var(--muted);padding:5px 10px;border-radius:8px;font-size:13.5px}
+#appTheme:hover{background:var(--hover);color:var(--ink)}
+#appTheme .moon,html.light #appTheme .sun{display:none}
+html.light #appTheme .moon{display:block}
+@media (max-width:760px){#appTheme{flex:1;flex-direction:column;gap:2px;font-size:11.5px;padding:6px 0;background:none!important;min-height:44px;justify-content:center}}
+html.light:root:root{--bg:#faf9f7;--paper:#ffffff;--ink:#141210;--body:#2e2b27;--muted:#77726a;--line:#e8e4dd;--rule:#d5cfc5;--accent:#ff4700;--hover:#f1eee9;--check:#ff4700;--soft:#f4f1ec;--we:#f6f4f0;
+  --glow:0 0 0 1px #ffc2a6,0 4px 14px rgba(255,71,0,.25);--wk:#b26d63;--obl:#3f7fc8;--irr:#c0652e;--over:#c0503e;color-scheme:light}
+html.light .chip{background:color-mix(in srgb,var(--cc) 30%,transparent);color:color-mix(in srgb,var(--cc) 55%,#000)}
+html.light .chip.done{background:color-mix(in srgb,var(--cc) 12%,transparent);color:color-mix(in srgb,var(--cc) 45%,var(--muted))}
+@media (max-width:600px){html.light .chip{background:color-mix(in srgb,var(--cc) 30%,transparent)}html.light .chip.done{background:color-mix(in srgb,var(--cc) 12%,transparent)}}
+html.light .qtime input,html.light .fl input,html.light .fl select,html.light .fadd input{color-scheme:light}
+html.light #fab{box-shadow:0 0 0 1px #ffc2a6,0 6px 18px rgba(255,71,0,.3)}
+html.light #fbar,html.light #lbar,html.light #toast,html.light #fTip{box-shadow:0 8px 24px rgba(0,0,0,.12)}
+html.light .ed mark{background:color-mix(in srgb,#d3a0b4 45%,transparent)}
+html.light .fmat .z{color:var(--rule)}
+
+/* ===== smoothness: transitions, scrolling, entrances ===== */
+html,#appCal,#appFin,main,#list,.panel,.flist,.ftw,.fcols{scroll-behavior:smooth}
+button,.tab,.nb,a,.day,.chip,.ev,.ni,.frow,.fcol,.fbar,.pill,.csw,.ftp,.fx,.fseg button,.tb,#acct,#appTheme,input,select,textarea,.fpin,.fcn{transition:background-color .22s ease,color .22s ease,border-color .22s ease,box-shadow .22s ease,opacity .22s ease,transform .18s ease}
+button:active:not(:disabled),.tab:active,.nb:active,.fcol:active{transform:scale(.97)}
+.fbt i,.fmeter i,.fcolp .fbv2,.fstack i{transition:width .45s cubic-bezier(.2,.7,.2,1),height .45s cubic-bezier(.2,.7,.2,1),flex-grow .45s ease}
+@keyframes appIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes popIn{from{opacity:0;transform:translateY(4px) scale(.98)}to{opacity:1;transform:none}}
+body[data-tab=notes] #appNotes,body[data-tab=cal] #appCal,body[data-tab=fin] #appFin{animation:appIn .28s cubic-bezier(.2,.7,.2,1)}
+.editor,#fbar:not([hidden]),#lbar:not([hidden]),#menu,.lg,.ask-box{animation:popIn .2s ease-out}
+#login:not([hidden]),#ask:not([hidden]){animation:appIn .25s ease-out}
+html.theming,html.theming *{transition:background-color .35s ease,color .35s ease,border-color .35s ease,fill .35s ease!important}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body data-tab="notes">
@@ -733,7 +765,7 @@ table{font-size:13px}
   <button class="tab" data-tab="fin"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="5" width="15" height="11" rx="2"/><path d="M2.5 8.5h15M6 13h3"/></svg>Финансы</button>
   <span class="grow"></span>
   <button id="acct" hidden><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3.5"/><path d="M3.5 17.5c1-3.5 3.6-5 6.5-5s5.5 1.5 6.5 5"/></svg><span id="acctLbl">Войти</span></button>
-  <button id="appTheme" title="Тема" aria-label="Тема"><svg width="15" height="15" viewBox="0 0 16 16" style="vertical-align:-2px"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
+  <button id="appTheme" title="Сменить тему"><svg class="sun" width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="3.6"/><path d="M10 1.8v2.4M10 15.8v2.4M1.8 10h2.4M15.8 10h2.4M4.2 4.2l1.7 1.7M14.1 14.1l1.7 1.7M4.2 15.8l1.7-1.7M14.1 5.9l1.7-1.7"/></svg><svg class="moon" width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16.5 12.2A7 7 0 0 1 7.8 3.5a7 7 0 1 0 8.7 8.7z"/></svg><span id="themeLbl2">Светлая</span></button>
 </nav>
 <div id="login" hidden><form class="lg" id="lgForm">
   <h2 id="lgTitle">Вход</h2>
@@ -936,7 +968,32 @@ table{font-size:13px}
   const tabsH = () => document.documentElement.style.setProperty('--tabs-h', document.getElementById('tabs').offsetHeight + 'px');
   tabsH(); addEventListener('resize', tabsH); addEventListener('orientationchange', () => setTimeout(tabsH, 300));
   addEventListener('hashchange', () => { const t = TABS[location.hash.slice(1)]; if (t) show(t); });
-  document.getElementById('appTheme').onclick = () => document.getElementById('themeBtn').click();
+  // light / dark switch (dark is the default)
+  const tBtn = document.getElementById('appTheme'), meta = document.querySelector('meta[name=theme-color]');
+  const showTheme = () => {
+    const light = document.documentElement.classList.contains('light');
+    document.getElementById('themeLbl2').textContent = light ? 'Тёмная' : 'Светлая';
+    tBtn.setAttribute('aria-label', light ? 'Включить тёмную тему' : 'Включить светлую тему');
+    meta.content = light ? '#faf9f7' : '#0f0d0a';
+  };
+  tBtn.onclick = () => {
+    const H = document.documentElement; H.classList.add('theming'); clearTimeout(tBtn.t); tBtn.t = setTimeout(() => H.classList.remove('theming'), 420);
+    const light = H.classList.toggle('light');
+    try { localStorage.setItem('my-app-theme', light ? 'light' : 'dark'); } catch (e) {}
+    showTheme();
+  };
+  showTheme();
+  // months slide in the direction you move
+  const slide = (btns, target) => btns.forEach(([id, dx]) => {
+    const b = document.getElementById(id); if (!b) return;
+    b.addEventListener('click', () => setTimeout(() => {
+      const el = document.querySelector(target);
+      if (el && el.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches)
+        el.animate([{opacity: .35, transform: `translateX(${dx}px)`}, {opacity: 1, transform: 'none'}], {duration: 260, easing: 'cubic-bezier(.2,.7,.2,1)'});
+    }, 0));
+  });
+  slide([['prev', -14], ['next', 14], ['todayBtn', 0]], '#grid');
+  addEventListener('load', () => slide([['fPrev', -14], ['fNext', 14], ['fToday', 0]], '#fKpi'));
   // draggable border between the month and the day panel (computer only)
   const split = document.getElementById('split'), app = split.parentElement;
   const setPW = w => {

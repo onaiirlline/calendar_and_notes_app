@@ -29,25 +29,29 @@ const DEFAULT_CATS = [
 ].map(([name, type]) => ({name, type}));
 // a new account starts with the categories only
 function seedItems() { return {settings: {id: 'settings', kind: 's', salary: 0, cats: DEFAULT_CATS, updated: Date.now()}}; }
-// what Marie's spreadsheet (окт 2026 — март 2027) held; moved over with one button
+// finances are kept from November 2026 on, with no end date
+const START = '2026-11';
+// what Marie's spreadsheet held, from November on; moved over with one button
 function sheetItems() {
   const now = Date.now(), it = {};
   it.settings = Object.assign(JSON.parse(JSON.stringify(settings())), {id: 'settings', kind: 's', salary: 75000});
-  const plans = {
-    '2026-10': {'Жильё': 20000, 'Коммунальные услуги': 5000, 'Кредитная карта': 10000, 'Здоровье': 4000},
-    '2026-11': {'Жильё': 20000, 'Коммунальные услуги': 6500, 'Кредитная карта': 6000, 'Здоровье': 6800},
-    '2026-12': {'Жильё': 20000}, '2027-01': {'Жильё': 20000}, '2027-02': {'Жильё': 20000}, '2027-03': {'Жильё': 20000}
-  };
-  Object.entries(plans).forEach(([m, p]) => { it['m' + m] = {id: 'm' + m, kind: 'm', month: m, plans: p, updated: now}; });
-  [['seed-oct-home', 'Жильё', 20000], ['seed-oct-ku', 'Коммунальные услуги', 5900], ['seed-oct-cc', 'Кредитная карта', 10000]]
-    .forEach(([id, cat, amount], i) => { it[id] = {id, kind: 'x', date: '2026-10-01', cat, desc: 'из таблицы', amount, type: OBL, created: now + i, updated: now}; });
+  it['m' + START] = {id: 'm' + START, kind: 'm', month: START, updated: now,
+    plans: {'Жильё': 20000, 'Коммунальные услуги': 6500, 'Кредитная карта': 6000, 'Здоровье': 6800}};
   return it;
+}
+// the first import also brought October and per-month copies of the plan; months now inherit the plan
+function cleanup() {
+  ['seed-oct-home', 'seed-oct-ku', 'seed-oct-cc', 'm2026-10'].forEach(id => { if (S.items[id]) drop(id); });
+  ['2026-12', '2027-01', '2027-02', '2027-03'].forEach(m => {
+    const d = S.items['m' + m];
+    if (d && d.salary == null && JSON.stringify(d.plans) === JSON.stringify({'Жильё': 20000})) drop(d.id);
+  });
 }
 
 let S = null;
 try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
 if (!S || !S.items) S = {items: {}};
-let cur = ymNow(), period = 'all', editId = null, armed = null, typeTouched = false;
+let cur = ymNow() < '2026-11' ? '2026-11' : ymNow(), period = 'all', editId = null, armed = null, typeTouched = false;
 try { const v = JSON.parse(localStorage.getItem('my-fin-ui') || '{}'); if (v.period) period = v.period; } catch (e) {}
 const saveUI = () => { try { localStorage.setItem('my-fin-ui', JSON.stringify({period})); } catch (e) {} };
 
@@ -69,8 +73,11 @@ function stats(ym) {
 }
 function periodMonths() {
   if (period === '6' || period === '12') { const n = +period, out = []; for (let k = n - 1; k >= 0; k--) out.push(ymAdd(cur, -k)); return out; }
-  const all = [...expenses().map(x => x.date.slice(0, 7)), ...Object.values(S.items).filter(i => i.kind === 'm').map(i => i.month), cur, ymNow()].sort();
-  const out = []; for (let m = all[0]; m <= all[all.length - 1]; m = ymAdd(m, 1)) out.push(m);
+  // from November 2026 (or an earlier expense) to whichever is latest: a year on, today, the open month, the last expense
+  const ex = expenses().map(x => x.date.slice(0, 7)).sort();
+  const start = ex.length && ex[0] < START ? ex[0] : START;
+  const end = [ymAdd(start, 11), ymNow(), cur, ex[ex.length - 1] || start].sort().pop();
+  const out = []; for (let m = start; m <= end; m = ymAdd(m, 1)) out.push(m);
   return out;
 }
 
@@ -179,7 +186,7 @@ root.innerHTML = `
       <div id="fCats" class="fbars"></div>
       <h4>По типу расходов</h4>
       <div id="fTypes"></div>
-      <div class="fch2"><h4>Обязательные расходы — план / факт</h4><button class="flink" id="fCopyPlan" type="button">взять план прошлого месяца</button></div>
+      <div class="fch2"><h4>Обязательные расходы — план / факт</h4><span class="fnote">план переходит на следующие месяцы</span></div>
       <div class="ftw"><table class="ft" id="fPlan"></table></div>
     </section>
   </div>
@@ -201,18 +208,18 @@ root.innerHTML = `
       <label class="fl fsal"><span>Зарплата / месяц по умолчанию, ₽</span><input id="fSalDef" inputmode="decimal"></label>
       <div id="fCatList" class="fcats"></div>
       <form class="fadd" id="fCatAdd"><input id="fCatNew" placeholder="Новая категория"><button class="fsec" type="submit">Добавить</button></form>
-      <div class="fimport" id="fImport" hidden><p>Можно перенести данные из таблицы «Финансы» (окт 2026 — март 2027): зарплату 75 000 ₽, планы обязательных расходов и расходы октября.</p><button class="fsec" id="fImportBtn" type="button">Перенести данные из таблицы</button></div>
+      <div class="fimport" id="fImport" hidden><p>Можно перенести данные из таблицы «Финансы»: зарплату 75 000 ₽ и план обязательных расходов, начиная с ноября 2026.</p><button class="fsec" id="fImportBtn" type="button">Перенести данные из таблицы</button></div>
     </section>
     <section class="fcard fhelp">
       <div class="fch"><h3>Как пользоваться</h3></div>
       <ol>
         <li><b>Внесение расхода.</b> В блоке «Расходы» укажите дату, категорию, сумму, при желании короткое описание, и нажмите «Добавить». Чтобы исправить или удалить запись, нажмите на неё.</li>
-        <li><b>Дата.</b> Любая, без ограничения периода. Расход попадает в свой месяц, и вкладка переключается на него.</li>
+        <li><b>Дата.</b> Учёт идёт с ноября 2026 и без конца: период не ограничен. Расход попадает в свой месяц, и вкладка переключается на него.</li>
         <li><b>Категория.</b> Выбирается из списка. Еду и мелкие ежедневные покупки добавлять не нужно: раздел рассчитан на заметные расходы.</li>
         <li><b>Тип.</b> «Обязательный» — жильё, КУ, кредитная карта и другие необходимые платежи. «Нерегулярный» — поездки, лечение, крупные покупки и т.п. Подставляется из справочника, но его можно поменять.</li>
         <li><b>Аналитика.</b> Считается сама: расходы, остаток от зарплаты, доля зарплаты, количество операций и средний чек. Зарплату за конкретный месяц можно поменять в карточке «Зарплата».</li>
-        <li><b>Месяцы.</b> Стрелки ‹ › листают месяцы. В «Обзоре по месяцам» можно смотреть последние 6 или 12 месяцев либо всё время.</li>
-        <li><b>План обязательных расходов.</b> В таблице «План / факт» впишите план на месяц. «Факт» считается по внесённым расходам. Кнопка «взять план прошлого месяца» переносит цифры.</li>
+        <li><b>Месяцы.</b> Стрелки ‹ › листают месяцы. В «Обзоре по месяцам» можно смотреть последние 6 или 12 месяцев либо всё время с ноября 2026; период растёт сам.</li>
+        <li><b>План обязательных расходов.</b> В таблице «План / факт» впишите план. Он действует и на следующие месяцы, пока вы его не поменяете (такие цифры показаны бледнее). Изменение в месяце действует с этого месяца. «Факт» считается по внесённым расходам.</li>
         <li><b>Справочник.</b> Здесь зарплата по умолчанию и категории: их можно переименовать, поменять тип, добавить или удалить.</li>
       </ol>
     </section>
@@ -223,6 +230,7 @@ const $ = id => document.getElementById(id);
 
 /* ---------- render ---------- */
 function render() {
+  cleanup();
   const st = stats(cur);
   const [y, m] = cur.split('-');
   $('fTitle').innerHTML = MONTHS[+m - 1] + ' <span>' + y + '</span>';
@@ -282,18 +290,25 @@ function renderTypes(st) {
     <div class="fstack" data-tip="${OBL}: ${rub(o)} · ${IRR}: ${rub(r)}">${t ? `<i class="obl" style="flex:${o}"></i><i class="irr" style="flex:${r}"></i>` : '<i class="none"></i>'}</div>
     <div class="flegend"><span><i class="obl"></i>${OBL} <b>${rub(o)}</b> <small>${pct(t ? o / t : 0)}</small></span><span><i class="irr"></i>${IRR} <b>${rub(r)}</b> <small>${pct(t ? r / t : 0)}</small></span></div>`;
 }
+// a month's plan: its own numbers, otherwise the latest earlier month that set them
+function planFor(ym) {
+  const plan = {}, from = {};
+  Object.values(S.items).filter(i => i.kind === 'm' && i.month <= ym && i.plans).sort((a, b) => a.month < b.month ? -1 : 1)
+    .forEach(d => Object.entries(d.plans).forEach(([k, v]) => { plan[k] = v; from[k] = d.month; }));
+  return {plan, from};
+}
 function oblCats() {
-  const md = monthDoc(cur), names = cats().filter(c => c.type === OBL).map(c => c.name);
-  Object.keys((md && md.plans) || {}).forEach(n => { if (!names.includes(n)) names.push(n); });
+  const names = cats().filter(c => c.type === OBL).map(c => c.name);
+  Object.keys(planFor(cur).plan).forEach(n => { if (!names.includes(n)) names.push(n); });
   return names;
 }
 function renderPlan(st) {
-  const md = monthDoc(cur), plans = (md && md.plans) || {};
+  const {plan, from} = planFor(cur);
   let P = 0, F = 0;
   const rows = oblCats().map(n => {
-    const p = plans[n], f = st.byCat[n] || 0; P += +p || 0; F += f;
+    const p = plan[n], f = st.byCat[n] || 0, inh = p != null && from[n] !== cur; P += +p || 0; F += f;
     const dv = (+p || 0) - f;
-    return `<tr><td>${esc(n)}</td><td><input class="fpin" data-cat="${esc(n)}" inputmode="decimal" value="${p != null ? nf.format(p) : ''}" placeholder="—" aria-label="План: ${esc(n)}"></td><td>${nn(f)}</td><td class="${p != null && dv < 0 ? 'over' : ''}">${p != null ? (dv < 0 ? '−' : '') + nn(Math.abs(dv)) : '—'}</td></tr>`;
+    return `<tr><td>${esc(n)}</td><td><input class="fpin${inh ? ' inh' : ''}" data-cat="${esc(n)}" inputmode="decimal" value="${p != null ? nf.format(p) : ''}" placeholder="—" aria-label="План: ${esc(n)}"${inh ? ` title="Как в ${ymLabel(from[n]).toLowerCase()}"` : ''}></td><td>${nn(f)}</td><td class="${p != null && dv < 0 ? 'over' : ''}">${p != null ? (dv < 0 ? '−' : '') + nn(Math.abs(dv)) : '—'}</td></tr>`;
   }).join('');
   const D = P - F;
   $('fPlan').innerHTML = `<thead><tr><th>Категория</th><th>План, ₽</th><th>Факт</th><th>Разница</th></tr></thead><tbody>${rows}</tbody>
@@ -302,6 +317,7 @@ function renderPlan(st) {
     const d = monthDoc(cur) || {id: 'm' + cur, kind: 'm', month: cur, plans: {}};
     d.plans = Object.assign({}, d.plans); const v = num(inp.value);
     if (v == null) delete d.plans[inp.dataset.cat]; else d.plans[inp.dataset.cat] = v;
+    if (!Object.keys(d.plans).length && d.salary == null && S.items[d.id]) { drop(d.id); render(); return; }
     touch(d); render();
   });
 }
@@ -391,12 +407,7 @@ function openEdit(id) {
 }
 $('fList').onclick = e => { const r = e.target.closest('.frow'); if (r) openEdit(r.dataset.id); };
 $('fList').onkeydown = e => { if (e.key === 'Enter') { const r = e.target.closest('.frow'); if (r) openEdit(r.dataset.id); } };
-$('fCopyPlan').onclick = () => {
-  let src = null; for (let m = ymAdd(cur, -1), k = 0; k < 120 && !src; m = ymAdd(m, -1), k++) { const d = monthDoc(m); if (d && d.plans && Object.keys(d.plans).length) src = d; }
-  if (!src) { toast2('Нет плана в прошлых месяцах'); return; }
-  const d = monthDoc(cur) || {id: 'm' + cur, kind: 'm', month: cur, plans: {}};
-  d.plans = Object.assign({}, src.plans, d.plans); touch(d); render(); toast2('План взят из: ' + ymLabel(src.month).toLowerCase());
-};
+
 $('fChart').onclick = e => { const b = e.target.closest('.fcol'); if (b) { cur = b.dataset.ym; resetForm(); render(); } };
 $('fMonths').onclick = e => { const r = e.target.closest('tr[data-ym]'); if (r) { cur = r.dataset.ym; resetForm(); render(); root.scrollTo({top: 0, behavior: 'smooth'}); } };
 $('fSalDef').onchange = e => { const v = num(e.target.value); setSettings(s => { s.salary = v || 0; }); };
@@ -426,7 +437,7 @@ $('fCatAdd').onsubmit = e => {
 };
 $('fImportBtn').onclick = () => {
   Object.values(sheetItems()).forEach(it => touch(it));
-  cur = '2026-10'; render(); toast2('Данные из таблицы перенесены');
+  cur = START; render(); toast2('Данные из таблицы перенесены');
 };
 function toast2(t) { if (typeof window.appToast === 'function') window.appToast(t); }
 
