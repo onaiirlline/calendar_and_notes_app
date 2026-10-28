@@ -368,8 +368,10 @@ function renderMatrix() {
   const cell = v => v ? nf.format(Math.round(v)) : '<span class="z">—</span>';
   $('fMatrix').innerHTML = `<thead><tr><th>Категория</th>${months.map(m => `<th class="${m === cur ? 'on' : ''}">${ymShort(m)}</th>`).join('')}<th>Всего</th></tr></thead><tbody>${
     names.map(n => { const vs = S2.map(s => s.byCat[n] || 0), t = vs.reduce((a, v) => a + v, 0);
-      return `<tr><td>${esc(n)}</td>${vs.map((v, i) => `<td class="${months[i] === cur ? 'on' : ''}">${cell(v)}</td>`).join('')}<td><b>${cell(t)}</b></td></tr>`; }).join('')
+      return `<tr class="${t ? '' : 'z0'}"><td>${esc(n)}</td>${vs.map((v, i) => `<td class="${months[i] === cur ? 'on' : ''}">${cell(v)}</td>`).join('')}<td><b>${cell(t)}</b></td></tr>`; }).join('')
   }</tbody><tfoot><tr><td>Итого</td>${S2.map(s => `<td class="${s.ym === cur ? 'on' : ''}">${cell(s.total)}</td>`).join('')}<td>${cell(S2.reduce((a, s) => a + s.total, 0))}</td></tr></tfoot>`;
+  const w = $('fMatrix').parentElement, th = $('fMatrix').querySelector('th.on');
+  if (th && w.clientWidth) w.scrollLeft = Math.max(0, th.offsetLeft - 120);
 }
 function renderRef() {
   $('fImport').hidden = expenses().length > 0 || Object.values(S.items).some(i => i.kind === 'm');

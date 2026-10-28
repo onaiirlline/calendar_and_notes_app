@@ -2,7 +2,7 @@
 <html lang="ru" class="locked">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <title>Блокнот и календарь</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="favicon.png">
@@ -853,14 +853,14 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
 .fhl details[open] p{animation:helpIn .3s cubic-bezier(.22,.8,.24,1)}
 @keyframes helpIn{from{opacity:0;transform:translateY(-4px)}}
 
-/* finance on phones: three sizes only — 13 captions · 16 text · 20 titles and key numbers */
+/* finance on phones: three sizes only — 12 captions · 14 text · 18 titles and key numbers */
 @media (max-width:600px){
-  .fin{font-size:16px;line-height:1.4;gap:12px;padding-top:8px}
+  .fin{font-size:14px;line-height:1.4;gap:12px;padding-top:8px}
   .fin *{letter-spacing:0}
-  .fin .ftile span,.fin .ftile small,.fin .fl span,.fin .ft th,.fin .fcoll,.fin .fcoll small,.fin .flegend,.fin .flegend small,.fin .flegend.small,.fin .fnote,.fin .fd,.fin .fc small,.fin .ftp,.fin .fseg button,.fin .fempty,.fin .fimport p,.fin .fmc small,.fin .fmc dt,.fin .fmch{font-size:13px;line-height:1.35}
-  .fin .fch h3,.fin .fsub,.fin .ftile b,.fin .fsalt input,.fin .fmc b{font-size:20px;line-height:1.2;font-weight:600}
-  .fin .fcard h4,.fin .fl input,.fin .fl select,.fin .fadd input,.fin .fcn,.fin .fpin,.fin .fpri,.fin .fsec,.fin .fdel,.fin .ft td,.fin .fbar,.fin .fc b,.fin .fa,.fin .fhl summary,.fin .fhl p,.fin .fmc dd,.fin .mp{font-size:16px}
-  .fin .mp small{font-size:13px}
+  .fin .ftile span,.fin .ftile small,.fin .fl span,.fin .ft th,.fin .fcoll,.fin .fcoll small,.fin .flegend,.fin .flegend small,.fin .flegend.small,.fin .fnote,.fin .fd,.fin .fc small,.fin .ftp,.fin .fseg button,.fin .fempty,.fin .fimport p,.fin .fmc small,.fin .fmc dt,.fin .fmch{font-size:12px;line-height:1.35}
+  .fin .fch h3,.fin .fsub,.fin .ftile b,.fin .fsalt input,.fin .fmc b{font-size:18px;line-height:1.2;font-weight:600}
+  .fin .fcard h4,.fin .fl input,.fin .fl select,.fin .fadd input,.fin .fcn,.fin .fpin,.fin .fpri,.fin .fsec,.fin .fdel,.fin .ft td,.fin .fbar,.fin .fc b,.fin .fa,.fin .fhl summary,.fin .fhl p,.fin .fmc dd,.fin .mp{font-size:14px}
+  .fin .mp small{font-size:12px}
   .fin .fcard{padding:16px;border-radius:14px}
   .fin .fch{margin-bottom:12px}
   .fin .fcard h4{margin:20px 0 10px;font-weight:600}
@@ -874,13 +874,13 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
   /* form */
   .fin .fform{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 10px;align-items:start}
   .fin .fl{gap:6px}
-  .fin .fl input,.fin .fl select,.fin .fadd input{height:46px;border-radius:10px;padding:0 12px}
-  .fin .fl input[type=date]{-webkit-appearance:none;appearance:none;display:block;width:100%;max-width:100%;min-width:0;text-align:left;line-height:46px}
+  .fin .fl input,.fin .fl select,.fin .fadd input{height:42px;border-radius:10px;padding:0 12px}
+  .fin .fl input[type=date]{-webkit-appearance:none;appearance:none;display:block;width:100%;max-width:100%;min-width:0;text-align:left;line-height:42px}
   .fin .fl input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
   .fin .fl input[type=date]::-webkit-calendar-picker-indicator{opacity:.5}
-  .fin .fl select{-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 20px,calc(100% - 13px) 20px;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
-  .fin .fpri{height:48px;border-radius:12px;font-weight:600}
-  .fin .fsec{height:44px;border-radius:10px;padding:0 14px}
+  .fin .fl select{-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 18px,calc(100% - 13px) 18px;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
+  .fin .fpri{height:44px;border-radius:12px;font-weight:600}
+  .fin .fsec{height:40px;border-radius:10px;padding:0 14px}
   .fin .fdel{height:44px}
   /* expense list */
   .fin .fxrow{grid-template-columns:52px 8px minmax(0,1fr) auto;gap:10px;padding:12px 2px}
@@ -896,22 +896,28 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
   .fin .ft td{padding:10px 6px}
   .fin .ft th{padding:8px 6px;font-weight:500}
   .fin #fPlan td:first-child{white-space:normal;min-width:0}
-  .fin .fpin{width:110px;height:40px;border-radius:8px;padding:0 10px}
+  .fin .fpin{width:100px;height:36px;border-radius:8px;padding:0 10px}
   /* plan / fact as rows: name and plan on top, fact and difference as captions under the name */
   .fin #fPlan thead{display:none}
   .fin #fPlan,.fin #fPlan tbody,.fin #fPlan tfoot{display:block}
   .fin #fPlan tr{display:grid;grid-template-columns:auto auto 1fr auto;grid-template-areas:"n n n p" "f d . p";align-items:center;column-gap:14px;row-gap:2px;padding:10px 0;border-bottom:1px solid var(--line)}
   .fin #fPlan tfoot tr{border-bottom:0;border-top:1px solid var(--rule);margin-top:-1px}
   .fin #fPlan td{display:block;padding:0;border:0;text-align:left}
-  .fin #fPlan td:nth-child(1){grid-area:n;font-size:16px}
+  .fin #fPlan td:nth-child(1){grid-area:n;font-size:14px}
   .fin #fPlan td:nth-child(2){grid-area:p;text-align:right}
-  .fin #fPlan td:nth-child(3){grid-area:f;font-size:13px;color:var(--muted)}
-  .fin #fPlan td:nth-child(4){grid-area:d;font-size:13px;color:var(--muted)}
+  .fin #fPlan td:nth-child(3){grid-area:f;font-size:12px;color:var(--muted)}
+  .fin #fPlan td:nth-child(4){grid-area:d;font-size:12px;color:var(--muted)}
   .fin #fPlan td:nth-child(3)::before{content:"факт "}
   .fin #fPlan td:nth-child(4)::before{content:"разница "}
   .fin #fPlan td.over{color:var(--over)}
-  .fin #fPlan tfoot td:nth-child(2){font-size:20px;font-weight:600;padding-right:10px}
-  .fin #fMatSub{font-size:13px;font-weight:400;color:var(--muted);margin-left:0;flex-basis:100%}
+  .fin #fPlan tfoot td:nth-child(2){font-size:18px;font-weight:600;padding-right:10px}
+  .fin .fmat{width:max-content;min-width:100%}
+  .fin .fmat th,.fin .fmat td{padding:9px 8px}
+  .fin .fmat td:first-child,.fin .fmat th:first-child{width:112px;min-width:112px;max-width:112px;white-space:normal;line-height:1.25;background:var(--bg);box-shadow:1px 0 0 var(--line),6px 0 8px -6px rgba(0,0,0,.25);z-index:2}
+  .fin .fmat td:not(:first-child),.fin .fmat th:not(:first-child){min-width:62px}
+  .fin .fmat tr.z0{display:none}
+  .fin .fmat td.on,.fin .fmat th.on{background:color-mix(in srgb,var(--accent) 5%,var(--bg))}
+  .fin #fMatSub{font-size:12px;font-weight:400;color:var(--muted);margin-left:0;flex-basis:100%}
   /* overview: swipeable chart and month cards instead of the wide table */
   .fin .fseg{align-self:flex-start}
   .fin .fseg button{padding:7px 12px}
@@ -937,7 +943,7 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
   .fin .fcatr{padding:6px 0;gap:6px}
   .fin .fcn{padding:6px 2px}
   .fin .ftp{padding:5px 10px}
-  .fin .fx{font-size:20px;padding:4px 8px}
+  .fin .fx{font-size:18px;padding:4px 8px}
   .fin .fadd input{flex:1}
 }
 </style>
