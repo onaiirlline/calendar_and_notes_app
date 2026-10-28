@@ -756,13 +756,32 @@ body[data-tab=notes] #appNotes,body[data-tab=cal] #appCal,body[data-tab=fin] #ap
 #login:not([hidden]),#ask:not([hidden]){animation:appIn .25s ease-out}
 html.theming,html.theming *{transition:background-color .35s ease,color .35s ease,border-color .35s ease,fill .35s ease!important}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* phone: icon-only bottom bar, account at the right edge; bigger toolbar; even sidebar type */
+@media (max-width:760px){
+  .tab .tl,#acctLbl,#themeLbl2{display:none}
+  .tab,#acct,#appTheme{flex:1;min-height:50px;padding:0!important;justify-content:center;align-items:center}
+  .tab svg,#acct svg,#appTheme svg{width:23px;height:23px}
+  #acct{order:10}
+  .bar-in{gap:2px;justify-content:space-between}
+  .tb{padding:7px 8px;min-width:38px;min-height:38px;display:flex;align-items:center;justify-content:center}
+  .tb i{font-size:20px;opacity:.9}
+  #burger{font-size:22px}
+  .side-h strong{font-size:17px}
+  #search{font-size:16px}
+  .ni b{font-size:15px}
+  .ni span{font-size:13px}
+  .side-f{font-size:15px}
+  .side-f button,.side-f label{padding:8px}
+  .side-f .hint{font-size:13.5px}
+}
 </style>
 </head>
 <body data-tab="notes">
 <nav class="tabs" id="tabs">
-  <button class="tab" data-tab="notes"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="2.5" width="12" height="15" rx="2"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>Заметки</button>
-  <button class="tab" data-tab="cal"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="4" width="15" height="13.5" rx="2"/><path d="M2.5 8h15M6.5 2.5v3M13.5 2.5v3"/></svg>Календарь</button>
-  <button class="tab" data-tab="fin"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="5" width="15" height="11" rx="2"/><path d="M2.5 8.5h15M6 13h3"/></svg>Финансы</button>
+  <button class="tab" data-tab="notes"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="2.5" width="12" height="15" rx="2"/><path d="M7 7h6M7 10h6M7 13h4"/></svg><span class="tl">Заметки</span></button>
+  <button class="tab" data-tab="cal"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="4" width="15" height="13.5" rx="2"/><path d="M2.5 8h15M6.5 2.5v3M13.5 2.5v3"/></svg><span class="tl">Календарь</span></button>
+  <button class="tab" data-tab="fin"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="5" width="15" height="11" rx="2"/><path d="M2.5 8.5h15M6 13h3"/></svg><span class="tl">Финансы</span></button>
   <span class="grow"></span>
   <button id="acct" hidden><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3.5"/><path d="M3.5 17.5c1-3.5 3.6-5 6.5-5s5.5 1.5 6.5 5"/></svg><span id="acctLbl">Войти</span></button>
   <button id="appTheme" title="Сменить тему"><svg class="sun" width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="3.6"/><path d="M10 1.8v2.4M10 15.8v2.4M1.8 10h2.4M15.8 10h2.4M4.2 4.2l1.7 1.7M14.1 14.1l1.7 1.7M4.2 15.8l1.7-1.7M14.1 5.9l1.7-1.7"/></svg><svg class="moon" width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16.5 12.2A7 7 0 0 1 7.8 3.5a7 7 0 1 0 8.7 8.7z"/></svg><span id="themeLbl2">Светлая</span></button>
@@ -858,11 +877,7 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
       <h3>Заметка дня</h3>
       <textarea id="daynote" placeholder="Мысли, итоги дня, что не забыть…"></textarea>
     </div>
-    <div class="sec" id="upSec">
-      <h3>Скоро</h3>
-      <div id="upcoming"></div>
-    </div>
-    <div class="ckeys"><kbd>←</kbd><kbd>→</kbd> день · <kbd>↑</kbd><kbd>↓</kbd> неделя · <kbd>PgUp</kbd><kbd>PgDn</kbd> месяц · <kbd>T</kbd> сегодня · <kbd>N</kbd> новое дело</div>
+    <div class="ckeys"><kbd>←</kbd><kbd>→</kbd> день · <kbd>↑</kbd><kbd>↓</kbd> неделя · <kbd>PgUp</kbd><kbd>PgDn</kbd> или колёсико — месяц · <kbd>T</kbd> сегодня · <kbd>N</kbd> новое дело</div>
   </div>
 </div>
 
@@ -994,6 +1009,35 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
   });
   slide([['prev', -14], ['next', 14], ['todayBtn', 0]], '#grid');
   addEventListener('load', () => slide([['fPrev', -14], ['fNext', 14], ['fToday', 0]], '#fKpi'));
+  // flip months with the mouse wheel or a sideways swipe
+  const grid = document.getElementById('grid');
+  const flip = d => document.getElementById(d > 0 ? 'next' : 'prev').click();
+  const canScroll = d => {
+    for (let el = grid.parentElement; el && el !== document.body; el = el.parentElement) {
+      const oy = getComputedStyle(el).overflowY;
+      if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight + 2)
+        return d > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 2 : el.scrollTop > 2;
+    }
+    return false;
+  };
+  let acc = 0, lock = 0;
+  grid.addEventListener('wheel', e => {
+    if (e.ctrlKey) return;
+    const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY), d = (horiz ? e.deltaX : e.deltaY) * (e.deltaMode ? 40 : 1);
+    if (!d || (!horiz && canScroll(d))) return;
+    e.preventDefault();
+    const now = Date.now();
+    if (now < lock) { lock = now + 180; return; }
+    acc += d;
+    if (Math.abs(acc) >= 50) { flip(acc); acc = 0; lock = now + 450; }
+  }, {passive: false});
+  let t0 = null;
+  grid.addEventListener('touchstart', e => { const t = e.touches[0]; t0 = e.touches.length === 1 ? {x: t.clientX, y: t.clientY} : null; }, {passive: true});
+  grid.addEventListener('touchend', e => {
+    if (!t0) return;
+    const t = e.changedTouches[0], dx = t.clientX - t0.x, dy = t.clientY - t0.y; t0 = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) flip(-dx);
+  }, {passive: true});
   // draggable border between the month and the day panel (computer only)
   const split = document.getElementById('split'), app = split.parentElement;
   const setPW = w => {
@@ -2121,7 +2165,7 @@ function persist() {
   const ok = saveLocal();
   if (!sync.col) setStatus(ok ? 'Сохранено' : '⚠ Не сохранилось');
   pushRemote();
-  renderGrid(); renderUpcoming(); renderSub();
+  renderGrid(); renderSub();
 }
 window.addEventListener('beforeunload', () => { if (saveT) persist(); });
 function setStatus(t) { $('#cstatus').textContent = t; }
@@ -2225,7 +2269,6 @@ function renderDay() {
   renderList();
   const dn = dayNote(sel), ta = $('#daynote');
   if (document.activeElement !== ta) { ta.value = dn ? dn.text : ''; autosize(ta); }
-  renderUpcoming();
 }
 function renderList() {
   const list = $('#clist'); list.innerHTML = '';
@@ -2401,28 +2444,6 @@ $('#daynote').addEventListener('input', e => {
   if (!it) it = S.items[id] = {id, kind: 'n', date: sel, text: ''};
   it.text = text; touch(it);
 });
-
-/* upcoming */
-function renderUpcoming() {
-  const box = $('#upcoming'); box.innerHTML = '';
-  const t = todayS(); let n = 0;
-  for (let i = 0; i < 14 && n < 8; i++) {
-    const ds = addDays(t, i);
-    if (ds === sel) continue;
-    eventsOn(ds).filter(it => !isDone(it, ds)).forEach(it => {
-      if (n >= 8) return; n++;
-      const r = document.createElement('div'); r.className = 'up';
-      const d = parse(ds);
-      r.innerHTML = '<span class="ud"></span><span class="ut"><b></b></span>';
-      r.querySelector('.ud').textContent = i === 0 ? 'сегодня' : i === 1 ? 'завтра' : WD_SHORT[d.getDay()] + ', ' + d.getDate();
-      r.querySelector('b').textContent = it.time || '';
-      r.querySelector('.ut').append(it.title || 'Без названия');
-      r.onclick = () => select(ds);
-      box.appendChild(r);
-    });
-  }
-  $('#upSec').hidden = !n;
-}
 
 /* keyboard */
 document.addEventListener('keydown', e => {
