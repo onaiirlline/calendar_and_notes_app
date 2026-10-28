@@ -1,7 +1,7 @@
 // Офлайн-режим: сначала пробуем сеть (чтобы обновления приходили сразу), без сети берём из кэша.
-const CACHE = 'my-app-v11';
+const CACHE = 'my-app-v12';
 const SHELL = [
-  './', './index.html', './config.js', './manifest.webmanifest',
+  './', './index.html', './fin.js', './config.js', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable.png', './apple-touch-icon.png', './favicon.png',
   './vendor/firebase-app-compat.js', './vendor/firebase-auth-compat.js', './vendor/firebase-firestore-compat.js'
 ];
