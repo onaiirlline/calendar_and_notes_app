@@ -945,6 +945,21 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
   .fin .fx{font-size:18px;padding:4px 8px}
   .fin .fadd input{flex:1}
 }
+
+/* finance is closed for now: blurred behind a soft notice */
+#finLock{display:none}
+body[data-tab=fin] #appFin{overflow:hidden!important}
+body[data-tab=fin] #appFin .fin{filter:blur(14px) saturate(.8);opacity:.55;pointer-events:none;user-select:none;-webkit-user-select:none;animation:finBlur .5s ease both}
+body[data-tab=fin] #finLock{display:grid;place-items:center;position:fixed;inset:0;z-index:5;padding:24px;animation:lockIn .45s ease both}
+html.locked #finLock{display:none!important}
+.flbox{max-width:340px;width:100%;text-align:center;background:color-mix(in srgb,var(--paper) 88%,transparent);border:1px solid var(--line);border-radius:18px;padding:28px 24px 26px;box-shadow:0 20px 60px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:lockBox .6s cubic-bezier(.22,.8,.24,1) .08s both}
+.flbox svg{color:var(--accent);margin-bottom:10px}
+.flbox h2{margin:0 0 6px;font-size:20px;font-weight:600;color:var(--ink)}
+.flbox p{margin:0;font-size:14px;line-height:1.5;color:var(--muted)}
+html.light .flbox{box-shadow:0 20px 60px rgba(60,40,20,.14)}
+@keyframes lockIn{from{opacity:0}}
+@keyframes lockBox{from{opacity:0;transform:translateY(14px) scale(.96)}}
+@keyframes finBlur{from{filter:blur(0);opacity:1}}
 </style>
 </head>
 <body data-tab="notes">
@@ -1012,6 +1027,11 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
 
 </div>
 <div id="appFin"></div>
+<div id="finLock" role="dialog" aria-modal="true" aria-labelledby="finLockT"><div class="flbox">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3.6 17.4a1.4 1.4 0 0 0 2 2l5.7-5.7a4 4 0 0 0 5.4-5.4l-2.5 2.5-2-.5-.5-2z"/></svg>
+  <h2 id="finLockT">Раздел в доработке</h2>
+  <p>Финансы скоро вернутся в обновлённом виде.</p>
+</div></div>
 <div id="appCal">
 <div class="app">
   <section class="cal">
