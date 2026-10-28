@@ -614,9 +614,9 @@ table{font-size:13px}
 .fdel{margin-left:auto;color:var(--muted);font-size:12.5px;padding:6px 10px;border-radius:4px}
 .fdel.armed{background:#b4443a;color:#fff}
 .flist{display:flex;flex-direction:column;max-height:420px;overflow:auto;margin:0 -4px}
-.frow{display:grid;grid-template-columns:52px 8px minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:4px}
-.frow:hover,.frow.on{background:var(--hover)}
-.frow.on{box-shadow:inset 2px 0 0 var(--accent)}
+.fxrow{display:grid;grid-template-columns:52px 8px minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:4px}
+.fxrow:hover,.fxrow.on{background:var(--hover)}
+.fxrow.on{box-shadow:inset 2px 0 0 var(--accent)}
 .fd{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .fdot{width:8px;height:8px;border-radius:50%}
 .fdot.obl,.flegend i.obl,.fstack i.obl{background:var(--obl)}
@@ -711,7 +711,7 @@ table{font-size:13px}
   .fdesc{grid-column:auto}
   .fbtns .fpri{flex:1}
   .flist{max-height:none}
-  .frow{grid-template-columns:44px 8px minmax(0,1fr) auto;gap:8px}
+  .fxrow{grid-template-columns:44px 8px minmax(0,1fr) auto;gap:8px}
   .fc{flex-direction:column;gap:0}
   .fbar{grid-template-columns:minmax(80px,36%) minmax(0,1fr) auto;gap:8px}
   .fbv{min-width:0}
@@ -746,7 +746,7 @@ html.light .fmat .z{color:var(--rule)}
 
 /* ===== smoothness: transitions, scrolling, entrances ===== */
 html,#appCal,#appFin,main,#list,.panel,.flist,.ftw,.fcols{scroll-behavior:smooth}
-button,.tab,.nb,a,.day,.chip,.ev,.ni,.frow,.fcol,.fbar,.pill,.csw,.ftp,.fx,.fseg button,.tb,#acct,#appTheme,input,select,textarea,.fpin,.fcn{transition:background-color .22s ease,color .22s ease,border-color .22s ease,box-shadow .22s ease,opacity .22s ease,transform .18s ease}
+button,.tab,.nb,a,.day,.chip,.ev,.ni,.fxrow,.fcol,.fbar,.pill,.csw,.ftp,.fx,.fseg button,.tb,#acct,#appTheme,input,select,textarea,.fpin,.fcn{transition:background-color .22s ease,color .22s ease,border-color .22s ease,box-shadow .22s ease,opacity .22s ease,transform .18s ease}
 button:active:not(:disabled),.tab:active,.nb:active,.fcol:active{transform:scale(.97)}
 .fbt i,.fmeter i,.fcolp .fbv2,.fstack i{transition:width .45s cubic-bezier(.2,.7,.2,1),height .45s cubic-bezier(.2,.7,.2,1),flex-grow .45s ease}
 @keyframes appIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}

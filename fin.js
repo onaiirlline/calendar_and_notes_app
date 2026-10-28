@@ -269,7 +269,7 @@ function renderList(st) {
   const list = st.list.slice().sort((a, b) => b.date.localeCompare(a.date) || (b.created || 0) - (a.created || 0));
   $('fExpSub').textContent = list.length ? rub(st.total) : '';
   $('fList').innerHTML = list.length ? list.map(x => `
-    <div class="frow${x.id === editId ? ' on' : ''}" data-id="${x.id}" tabindex="0">
+    <div class="fxrow${x.id === editId ? ' on' : ''}" data-id="${x.id}" tabindex="0">
       <span class="fd">${dLabel(x.date)}</span>
       <span class="fdot ${x.type === OBL ? 'obl' : 'irr'}" title="${esc(x.type)}"></span>
       <span class="fc"><b>${esc(x.cat)}</b>${x.desc ? `<small>${esc(x.desc)}</small>` : ''}</span>
@@ -405,8 +405,8 @@ function openEdit(id) {
   renderList(stats(cur));
   $('fForm').scrollIntoView({block: 'nearest', behavior: 'smooth'});
 }
-$('fList').onclick = e => { const r = e.target.closest('.frow'); if (r) openEdit(r.dataset.id); };
-$('fList').onkeydown = e => { if (e.key === 'Enter') { const r = e.target.closest('.frow'); if (r) openEdit(r.dataset.id); } };
+$('fList').onclick = e => { const r = e.target.closest('.fxrow'); if (r) openEdit(r.dataset.id); };
+$('fList').onkeydown = e => { if (e.key === 'Enter') { const r = e.target.closest('.fxrow'); if (r) openEdit(r.dataset.id); } };
 
 $('fChart').onclick = e => { const b = e.target.closest('.fcol'); if (b) { cur = b.dataset.ym; resetForm(); render(); } };
 $('fMonths').onclick = e => { const r = e.target.closest('tr[data-ym]'); if (r) { cur = r.dataset.ym; resetForm(); render(); root.scrollTo({top: 0, behavior: 'smooth'}); } };
