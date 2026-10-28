@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" class="locked">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -150,6 +150,10 @@ td:focus{box-shadow:inset 0 0 0 2px var(--accent)}
 #acct[hidden]{display:none}
 #login{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;padding:16px}
 #login[hidden]{display:none}
+html.locked #tabs,html.locked #appNotes,html.locked #appCal{display:none!important}
+html.locked #login{background:var(--bg)}
+html.locked #lgCancel{display:none}
+#status,#cstatus{display:none!important}
 .lg{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px;width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;box-shadow:0 16px 48px rgba(0,0,0,.2)}
 .lg h2{margin:0 0 2px;font-size:19px}
 .lg p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.45}
@@ -451,7 +455,7 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
 </nav>
 <div id="login" hidden><form class="lg" id="lgForm">
   <h2 id="lgTitle">Вход</h2>
-  <p id="lgText">Войдите, чтобы заметки и календарь были одинаковыми на телефоне и компьютере.</p>
+  <p id="lgText">Войдите, чтобы открыть заметки и календарь.</p>
   <input type="email" id="lgEmail" placeholder="Почта" autocomplete="username" required>
   <input type="password" id="lgPass" placeholder="Пароль" autocomplete="current-password" required>
   <div class="err" id="lgErr"></div>
@@ -554,7 +558,7 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
   function init() {
     if (ready) return ready;
     ready = new Promise(res => {
-      if (!cfg || !window.firebase) { res(null); return; }
+      if (!cfg || !window.firebase) { document.documentElement.classList.remove('locked'); res(null); return; }
       try {
         firebase.initializeApp(cfg);
         const db = firebase.firestore();
@@ -564,9 +568,11 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
           current = u;
           acct.hidden = false;
           lbl.textContent = u ? 'Аккаунт' : 'Войти';
+          document.documentElement.classList.toggle('locked', !u);
+          if (u) box.hidden = true; else openBox();
           if (first) { first = false; res(u ? {db, uid: u.uid} : null); }
         });
-      } catch (e) { res(null); }
+      } catch (e) { document.documentElement.classList.remove('locked'); res(null); }
     });
     return ready;
   }
@@ -589,7 +595,7 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
       $('lgOk').textContent = 'Выйти';
     } else {
       $('lgTitle').textContent = 'Вход';
-      $('lgText').textContent = 'Войдите, чтобы заметки и календарь были одинаковыми на телефоне и компьютере.';
+      $('lgText').textContent = 'Войдите, чтобы открыть заметки и календарь.';
       $('lgEmail').hidden = $('lgPass').hidden = false;
       $('lgEmail').required = $('lgPass').required = true;
       $('lgOk').textContent = 'Войти';
@@ -598,8 +604,9 @@ button,.day,.ev,.ni,.tab,.up,.chip{-webkit-tap-highlight-color:transparent;touch
     if (!current) $('lgEmail').focus();
   }
   acct.onclick = openBox;
-  $('lgCancel').onclick = () => { box.hidden = true; };
-  box.addEventListener('click', e => { if (e.target === box) box.hidden = true; });
+  const locked = () => document.documentElement.classList.contains('locked');
+  $('lgCancel').onclick = () => { if (!locked()) box.hidden = true; };
+  box.addEventListener('click', e => { if (e.target === box && !locked()) box.hidden = true; });
   form.addEventListener('submit', async e => {
     e.preventDefault();
     $('lgOk').disabled = true;
