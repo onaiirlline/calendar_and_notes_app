@@ -197,7 +197,8 @@ root.innerHTML = `
     </div>
     <div class="fkpi fkpi2" id="fKpi2"></div>
     <div class="fchart" id="fChart" role="img"></div>
-    <div class="ftw"><table class="ft fnum" id="fMonths"></table></div>
+    <div class="fmcards" id="fMCards"></div>
+    <div class="ftw ftwm"><table class="ft fnum" id="fMonths"></table></div>
   </section>
   <section class="fcard">
     <div class="fch"><h3>Расходы по категориям</h3><span class="fsub" id="fMatSub"></span></div>
@@ -213,16 +214,16 @@ root.innerHTML = `
     </section>
     <section class="fcard fhelp">
       <div class="fch"><h3>Как пользоваться</h3></div>
-      <ol>
-        <li><b>Внесение расхода.</b> В блоке «Расходы» укажите дату, категорию, сумму, при желании короткое описание, и нажмите «Добавить». Чтобы исправить или удалить запись, нажмите на неё.</li>
-        <li><b>Дата.</b> Учёт идёт с ноября 2026 и без конца: период не ограничен. Расход попадает в свой месяц, и вкладка переключается на него.</li>
-        <li><b>Категория.</b> Выбирается из списка. Еду и мелкие ежедневные покупки добавлять не нужно: раздел рассчитан на заметные расходы.</li>
-        <li><b>Тип.</b> «Обязательный» — жильё, КУ, кредитная карта и другие необходимые платежи. «Нерегулярный» — поездки, лечение, крупные покупки и т.п. Подставляется из справочника, но его можно поменять.</li>
-        <li><b>Аналитика.</b> Считается сама: расходы, остаток от зарплаты, доля зарплаты, количество операций и средний чек. Зарплату за конкретный месяц можно поменять в карточке «Зарплата».</li>
-        <li><b>Месяцы.</b> Нажмите на плашку месяца вверху, чтобы открыть его; текущий месяц отмечен точкой. В «Обзоре по месяцам» можно смотреть последние 6 или 12 месяцев либо всё время с ноября 2026; период растёт сам.</li>
-        <li><b>План обязательных расходов.</b> В таблице «План / факт» впишите план. Он действует и на следующие месяцы, пока вы его не поменяете (такие цифры показаны бледнее). Изменение в месяце действует с этого месяца. «Факт» считается по внесённым расходам.</li>
-        <li><b>Справочник.</b> Здесь зарплата по умолчанию и категории: их можно переименовать, поменять тип, добавить или удалить.</li>
-      </ol>
+      <div class="fhl">
+        <details><summary>Внесение расхода</summary><p>В блоке «Расходы» укажите дату, категорию, сумму, при желании короткое описание, и нажмите «Добавить». Чтобы исправить или удалить запись, нажмите на неё.</p></details>
+        <details><summary>Дата</summary><p>Учёт идёт с ноября 2026 и без конца: период не ограничен. Расход попадает в свой месяц, и вкладка переключается на него.</p></details>
+        <details><summary>Категория</summary><p>Выбирается из списка. Еду и мелкие ежедневные покупки добавлять не нужно: раздел рассчитан на заметные расходы.</p></details>
+        <details><summary>Тип</summary><p>«Обязательный» — жильё, КУ, кредитная карта и другие необходимые платежи. «Нерегулярный» — поездки, лечение, крупные покупки и т.п. Подставляется из справочника, но его можно поменять.</p></details>
+        <details><summary>Аналитика</summary><p>Считается сама: расходы, остаток от зарплаты, доля зарплаты, количество операций и средний чек. Зарплату за конкретный месяц можно поменять в карточке «Зарплата».</p></details>
+        <details><summary>Месяцы</summary><p>Нажмите на плашку месяца вверху, чтобы открыть его; текущий месяц отмечен точкой. В «Обзоре по месяцам» можно смотреть последние 6 или 12 месяцев либо всё время с ноября 2026; период растёт сам.</p></details>
+        <details><summary>План обязательных расходов</summary><p>В таблице «План / факт» впишите план. Он действует и на следующие месяцы, пока вы его не поменяете (такие цифры показаны бледнее). Изменение в месяце действует с этого месяца. «Факт» считается по внесённым расходам.</p></details>
+        <details><summary>Справочник</summary><p>Здесь зарплата по умолчанию и категории: их можно переименовать, поменять тип, добавить или удалить.</p></details>
+      </div>
     </section>
   </div>
 </div>
@@ -347,6 +348,15 @@ function renderOverview() {
     <div class="flegend small"><span><i class="fbk"></i>Расходы</span><span><i class="salk"></i>Зарплата</span></div>`;
   const rows = S2.map(s => `<tr data-ym="${s.ym}" class="${s.ym === cur ? 'on' : ''}"><td>${ymLabel(s.ym)}</td><td>${rub(s.total)}</td><td class="${s.rest < 0 ? 'over' : ''}">${rub(s.rest)}</td><td>${pct(s.share)}</td><td>${s.count}</td><td>${rub(s.avg)}</td><td>${rub(s.byType[OBL])}</td><td>${rub(s.byType[IRR])}</td></tr>`).join('');
   const rest = S2.reduce((a, s) => a + s.rest, 0);
+  const mc = (h, s, on) => `<button type="button" class="fmc${on ? ' on' : ''}"${s.ym ? ` data-ym="${s.ym}"` : ''}>
+    <span class="fmch">${h}</span><b>${rub(s.total)}</b><small>${s.sal ? pct(s.share) + ' зарплаты' : 'расходы'}</small>
+    <dl><dt>Остаток</dt><dd class="${s.rest < 0 ? 'over' : ''}">${rub(s.rest)}</dd><dt>Операций</dt><dd>${s.count}</dd><dt>Средний чек</dt><dd>${rub(s.avg)}</dd>
+    <dt>Обязательные</dt><dd>${rub(s.byType[OBL])}</dd><dt>Нерегулярные</dt><dd>${rub(s.byType[IRR])}</dd></dl></button>`;
+  const box = $('fMCards');
+  box.innerHTML = S2.map(s => mc(ymLabel(s.ym), s, s.ym === cur)).join('') +
+    mc('Итого за период', {total, rest, count: cnt, avg: cnt ? total / cnt : 0, sal: 0, byType: {[OBL]: S2.reduce((a, s) => a + s.byType[OBL], 0), [IRR]: S2.reduce((a, s) => a + s.byType[IRR], 0)}}, false);
+  const on = box.querySelector('.fmc.on');
+  if (on && box.clientWidth) box.scrollLeft = on.offsetLeft - 16;
   $('fMonths').innerHTML = `<thead><tr><th>Месяц</th><th>Расходы</th><th>Остаток</th><th>% зарплаты</th><th>Кол-во</th><th>Средний чек</th><th>Обязательные</th><th>Нерегулярные</th></tr></thead><tbody>${rows}</tbody>
     <tfoot><tr><td>Итого</td><td>${rub(total)}</td><td>${rub(rest)}</td><td></td><td>${cnt}</td><td>${rub(cnt ? total / cnt : 0)}</td><td>${rub(S2.reduce((a, s) => a + s.byType[OBL], 0))}</td><td>${rub(S2.reduce((a, s) => a + s.byType[IRR], 0))}</td></tr></tfoot>`;
 }
@@ -416,6 +426,7 @@ $('fList').onclick = e => { const r = e.target.closest('.fxrow'); if (r) openEdi
 $('fList').onkeydown = e => { if (e.key === 'Enter') { const r = e.target.closest('.fxrow'); if (r) openEdit(r.dataset.id); } };
 
 $('fChart').onclick = e => { const b = e.target.closest('.fcol'); if (b) { cur = b.dataset.ym; resetForm(); render(); } };
+$('fMCards').onclick = e => { const c = e.target.closest('.fmc[data-ym]'); if (c && c.dataset.ym !== cur) { cur = c.dataset.ym; resetForm(); render(); root.scrollTo({top: 0, behavior: 'smooth'}); } };
 $('fMonths').onclick = e => { const r = e.target.closest('tr[data-ym]'); if (r) { cur = r.dataset.ym; resetForm(); render(); root.scrollTo({top: 0, behavior: 'smooth'}); } };
 $('fSalDef').onchange = e => { const v = num(e.target.value); setSettings(s => { s.salary = v || 0; }); };
 $('fCatList').addEventListener('change', e => {

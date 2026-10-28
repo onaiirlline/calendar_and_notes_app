@@ -838,28 +838,107 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
 .fin .fhelp ol{gap:10px;line-height:1.6}
 .fin .fimport p{font-size:13px}
 #fTip{font-size:13px}
+}
+
+/* finance: month cards (phone) and collapsible help */
+.fmcards{display:none}
+.fhl{display:flex;flex-direction:column}
+.fhl details{border-bottom:1px solid var(--line)}
+.fhl details:last-child{border-bottom:0}
+.fhl summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;font-weight:500;color:var(--ink)}
+.fhl summary::-webkit-details-marker{display:none}
+.fhl summary::after{content:"";flex:none;width:7px;height:7px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:rotate(45deg) translate(-2px,-2px);transition:transform .3s cubic-bezier(.22,.8,.24,1)}
+.fhl details[open] summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+.fhl p{margin:0 0 12px;color:var(--body);line-height:1.55}
+.fhl details[open] p{animation:helpIn .3s cubic-bezier(.22,.8,.24,1)}
+@keyframes helpIn{from{opacity:0;transform:translateY(-4px)}}
+
+/* finance on phones: three sizes only — 13 captions · 16 text · 20 titles and key numbers */
 @media (max-width:600px){
-  .fin{font-size:15px}
-  .fin .fch h3{font-size:17px}
-  .fin .fcard h4{font-size:15px}
-  .fin .fsub{font-size:16px}
-  .fin .ftile{padding:10px 12px;gap:2px}
-  .fin .ftile span{font-size:12.5px;line-height:1.3}
-  .fin .ftile b,.fin .fsalt input{font-size:20px}
-  .fin .fl span{font-size:13px}
-  .fin .fl input,.fin .fl select,.fin .fadd input,.fin .fcn,.fin .fpin{font-size:16px;height:40px}
-  .fin .fpin{height:34px}
-  .fin .fpri,.fin .fsec,.fin .fdel{font-size:15px}
-  .fin .fpri{height:44px}
-  .fin .fc small,.fin .fd{font-size:13px}
-  .fin .fbar,.fin .flegend{font-size:14px}
-  .fin .flegend small,.fin .flegend.small,.fin .fnote{font-size:12.5px}
-  .fin .ft,.fin .ft td{font-size:14px;padding:8px 6px}
-  .fin .ft th{font-size:12px;padding:8px 6px}
-  .fin .fseg button{font-size:13px;padding:6px 10px}
-  .fin .fcols{grid-template-columns:repeat(var(--n),minmax(34px,1fr));height:150px}
-  .fin .fcoll{font-size:11.5px}
-  .fin .ftp{font-size:12.5px}
+  .fin{font-size:16px;line-height:1.4;gap:12px;padding-top:8px}
+  .fin *{letter-spacing:0}
+  .fin .ftile span,.fin .ftile small,.fin .fl span,.fin .ft th,.fin .fcoll,.fin .fcoll small,.fin .flegend,.fin .flegend small,.fin .flegend.small,.fin .fnote,.fin .fd,.fin .fc small,.fin .ftp,.fin .fseg button,.fin .fempty,.fin .fimport p,.fin .fmc small,.fin .fmc dt,.fin .fmch{font-size:13px;line-height:1.35}
+  .fin .fch h3,.fin .fsub,.fin .ftile b,.fin .fsalt input,.fin .fmc b{font-size:20px;line-height:1.2;font-weight:600}
+  .fin .fcard h4,.fin .fl input,.fin .fl select,.fin .fadd input,.fin .fcn,.fin .fpin,.fin .fpri,.fin .fsec,.fin .fdel,.fin .ft td,.fin .fbar,.fin .fc b,.fin .fa,.fin .fhl summary,.fin .fhl p,.fin .fmc dd,.fin .mp{font-size:16px}
+  .fin .mp small{font-size:13px}
+  .fin .fcard{padding:16px;border-radius:14px}
+  .fin .fch{margin-bottom:12px}
+  .fin .fcard h4{margin:20px 0 10px;font-weight:600}
+  .fin .fcard h4:first-of-type{margin-top:4px}
+  .fin .fch2{margin:20px 0 8px;flex-direction:column;align-items:flex-start;gap:2px}
+  .fin .fch2 .fnote{margin:0}
+  /* key numbers */
+  .fin .fkpi{gap:8px}
+  .fin .ftile{padding:12px 14px;border-radius:14px;gap:4px}
+  .fin .fsalt input{border-bottom-style:dotted}
+  /* form */
+  .fin .fform{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 10px;align-items:start}
+  .fin .fl{gap:6px}
+  .fin .fl input,.fin .fl select,.fin .fadd input{height:46px;border-radius:10px;padding:0 12px}
+  .fin .fl input[type=date]{-webkit-appearance:none;appearance:none;display:block;width:100%;max-width:100%;min-width:0;text-align:left;line-height:46px}
+  .fin .fl input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+  .fin .fl input[type=date]::-webkit-calendar-picker-indicator{opacity:.5}
+  .fin .fl select{-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 20px,calc(100% - 13px) 20px;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
+  .fin .fpri{height:48px;border-radius:12px;font-weight:600}
+  .fin .fsec{height:44px;border-radius:10px;padding:0 14px}
+  .fin .fdel{height:44px}
+  /* expense list */
+  .fin .fxrow{grid-template-columns:52px 8px minmax(0,1fr) auto;gap:10px;padding:12px 2px}
+  .fin .fc{flex-direction:column;gap:2px}
+  .fin .fc b{font-weight:500}
+  .fin .fa{font-weight:600}
+  /* analytics */
+  .fin .fbars{gap:10px}
+  .fin .fbar{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"l v" "t t";gap:4px 10px}
+  .fin .fbl{grid-area:l}.fin .fbv{grid-area:v;min-width:0}.fin .fbt{grid-area:t;height:8px}
+  .fin .fstack{height:10px}
+  .fin .flegend{gap:6px 16px}
+  .fin .ft td{padding:10px 6px}
+  .fin .ft th{padding:8px 6px;font-weight:500}
+  .fin #fPlan td:first-child{white-space:normal;min-width:0}
+  .fin .fpin{width:110px;height:40px;border-radius:8px;padding:0 10px}
+  /* plan / fact as rows: name and plan on top, fact and difference as captions under the name */
+  .fin #fPlan thead{display:none}
+  .fin #fPlan,.fin #fPlan tbody,.fin #fPlan tfoot{display:block}
+  .fin #fPlan tr{display:grid;grid-template-columns:auto auto 1fr auto;grid-template-areas:"n n n p" "f d . p";align-items:center;column-gap:14px;row-gap:2px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .fin #fPlan tfoot tr{border-bottom:0;border-top:1px solid var(--rule);margin-top:-1px}
+  .fin #fPlan td{display:block;padding:0;border:0;text-align:left}
+  .fin #fPlan td:nth-child(1){grid-area:n;font-size:16px}
+  .fin #fPlan td:nth-child(2){grid-area:p;text-align:right}
+  .fin #fPlan td:nth-child(3){grid-area:f;font-size:13px;color:var(--muted)}
+  .fin #fPlan td:nth-child(4){grid-area:d;font-size:13px;color:var(--muted)}
+  .fin #fPlan td:nth-child(3)::before{content:"факт "}
+  .fin #fPlan td:nth-child(4)::before{content:"разница "}
+  .fin #fPlan td.over{color:var(--over)}
+  .fin #fPlan tfoot td:nth-child(2){font-size:20px;font-weight:600;padding-right:10px}
+  .fin #fMatSub{font-size:13px;font-weight:400;color:var(--muted);margin-left:0;flex-basis:100%}
+  /* overview: swipeable chart and month cards instead of the wide table */
+  .fin .fseg{align-self:flex-start}
+  .fin .fseg button{padding:7px 12px}
+  .fin .fkpi2{margin-bottom:16px}
+  .fin .fchart{margin:0 -16px 12px;padding:0 16px;overflow-x:auto;scrollbar-width:none}
+  .fin .fchart::-webkit-scrollbar{display:none}
+  .fin .fcols{grid-template-columns:repeat(var(--n),48px);height:150px;overflow:visible;width:max-content}
+  .fin .ftwm{display:none}
+  .fin .fmcards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:2px 16px 4px;scroll-padding:0 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .fin .fmcards::-webkit-scrollbar{display:none}
+  .fmc{flex:none;width:78%;max-width:300px;scroll-snap-align:start;text-align:left;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--paper);display:flex;flex-direction:column;gap:2px;color:var(--body)}
+  .fmc.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+  .fmc .fmch{color:var(--muted)}
+  .fmc.on .fmch{color:var(--accent);font-weight:600}
+  .fmc b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .fmc small{color:var(--muted)}
+  .fmc dl{display:grid;grid-template-columns:auto auto;justify-content:space-between;gap:6px 12px;margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+  .fmc dt{color:var(--muted);align-self:center}
+  .fmc dd{margin:0;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+  .fmc dd.over{color:var(--over)}
+  /* reference */
+  .fin .fsal{max-width:none}
+  .fin .fcatr{padding:6px 0;gap:6px}
+  .fin .fcn{padding:6px 2px}
+  .fin .ftp{padding:5px 10px}
+  .fin .fx{font-size:20px;padding:4px 8px}
+  .fin .fadd input{flex:1}
 }
 </style>
 </head>
