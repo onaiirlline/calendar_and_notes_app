@@ -72,7 +72,13 @@ function stats(ym) {
   return {ym, list, total, count: list.length, avg: list.length ? total / list.length : 0, sal, rest: sal - total, share: sal ? total / sal : 0, byCat, byType};
 }
 function periodMonths() {
-  if (period === '6' || period === '12') { const n = +period, out = []; for (let k = n - 1; k >= 0; k--) out.push(ymAdd(cur, -k)); return out; }
+  if (period !== 'all') {
+    // n months ending with the open one, but never before the start of the records
+    const ex0 = expenses().map(x => x.date.slice(0, 7)).sort()[0], first = ex0 && ex0 < START ? ex0 : START, n = +period, out = [];
+    let m = ymAdd(cur, -(n - 1)); if (m < first) m = first;
+    for (let k = 0; k < n; k++, m = ymAdd(m, 1)) out.push(m);
+    return out;
+  }
   // from November 2026 (or an earlier expense) to whichever is latest: a year on, today, the open month, the last expense
   const ex = expenses().map(x => x.date.slice(0, 7)).sort();
   const start = ex.length && ex[0] < START ? ex[0] : START;
@@ -193,7 +199,7 @@ root.innerHTML = `
   </div>
   <section class="fcard">
     <div class="fch"><h3>Обзор по месяцам</h3>
-      <div class="fseg" id="fPeriod"><button data-p="6">6 мес</button><button data-p="12">12 мес</button><button data-p="all">Всё время</button></div>
+      <div class="fseg" id="fPeriod"><button data-p="6">6 мес</button><button data-p="9">9 мес</button><button data-p="12">12 мес</button><button data-p="all">Всё время</button></div>
     </div>
     <div class="fkpi fkpi2" id="fKpi2"></div>
     <div class="fchart" id="fChart" role="img"></div>
@@ -220,7 +226,7 @@ root.innerHTML = `
         <details><summary>Категория</summary><p>Выбирается из списка. Еду и мелкие ежедневные покупки добавлять не нужно: раздел рассчитан на заметные расходы.</p></details>
         <details><summary>Тип</summary><p>«Обязательный» — жильё, КУ, кредитная карта и другие необходимые платежи. «Нерегулярный» — поездки, лечение, крупные покупки и т.п. Подставляется из справочника, но его можно поменять.</p></details>
         <details><summary>Аналитика</summary><p>Считается сама: расходы, остаток от зарплаты, доля зарплаты, количество операций и средний чек. Зарплату за конкретный месяц можно поменять в карточке «Зарплата».</p></details>
-        <details><summary>Месяцы</summary><p>Нажмите на плашку месяца вверху, чтобы открыть его; текущий месяц отмечен точкой. В «Обзоре по месяцам» можно смотреть последние 6 или 12 месяцев либо всё время с ноября 2026; период растёт сам.</p></details>
+        <details><summary>Месяцы</summary><p>Нажмите на плашку месяца вверху, чтобы открыть его; текущий месяц отмечен точкой. В «Обзоре по месяцам» можно смотреть 6, 9 или 12 месяцев либо всё время с ноября 2026; период растёт сам.</p></details>
         <details><summary>План обязательных расходов</summary><p>В таблице «План / факт» впишите план. Он действует и на следующие месяцы, пока вы его не поменяете (такие цифры показаны бледнее). Изменение в месяце действует с этого месяца. «Факт» считается по внесённым расходам.</p></details>
         <details><summary>Справочник</summary><p>Здесь зарплата по умолчанию и категории: их можно переименовать, поменять тип, добавить или удалить.</p></details>
       </div>
