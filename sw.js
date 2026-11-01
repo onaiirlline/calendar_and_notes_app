@@ -1,7 +1,7 @@
 // Офлайн-режим: сначала пробуем сеть (чтобы обновления приходили сразу), без сети берём из кэша.
-const CACHE = 'my-app-v20';
+const CACHE = 'my-app-v21';
 const SHELL = [
-  './', './index.html', './fin.js', './config.js', './manifest.webmanifest',
+  './', './index.html', './config.js', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable.png', './apple-touch-icon.png', './favicon.png',
   './vendor/firebase-app-compat.js', './vendor/firebase-auth-compat.js', './vendor/firebase-firestore-compat.js'
 ];
@@ -22,3 +22,4 @@ self.addEventListener('fetch', e => {
     }).catch(() => caches.match(req, {ignoreSearch: true}).then(r => r || (req.mode === 'navigate' ? caches.match('./index.html') : undefined)))
   );
 });
+
