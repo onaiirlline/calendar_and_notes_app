@@ -601,6 +601,27 @@ html.light #fab,html:not(.light) #fab{box-shadow:0 7px 20px color-mix(in srgb,va
 /* Event labels keep the pastel palette while staying readable in each theme. */
 .chip:not(.done){color:color-mix(in srgb,var(--cc) 38%,var(--ink))}
 html:not(.light) .chip:not(.done){color:color-mix(in srgb,var(--cc) 78%,var(--ink))}
+
+/* Scroll the event list within its own day cell. */
+.day:hover{
+  overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:color-mix(in srgb,var(--muted) 45%,transparent) transparent
+}
+.day:hover .num{
+  position:sticky;top:0;z-index:2;
+  background:var(--soft)
+}
+.day.today:hover .num{background:var(--accent)}
+.day::-webkit-scrollbar{width:4px}
+.day::-webkit-scrollbar-track{background:transparent}
+.day::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--muted) 45%,transparent);border-radius:99px}
+@media (hover:none) and (pointer:coarse){
+  .day{overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+  .day .num{position:sticky;top:0;z-index:2;background:var(--soft)}
+  .day.today .num{background:var(--accent)}
+}
+
 </style>
 </head>
 <body>
@@ -979,7 +1000,7 @@ function renderGrid() {
     if (dn && dn.text && dn.text.trim()) { const m = document.createElement('div'); m.className = 'dn'; m.title = 'Есть заметка дня'; c.appendChild(m); }
     const evs = eventsOn(ds);
     const box = document.createElement('div'); box.className = 'chips';
-    evs.slice(0, 4).forEach(it => {
+    evs.forEach(it => {
       const ch = document.createElement('div');
       ch.className = 'chip ' + (it.color || 'c1') + (it.time ? '' : ' allday') + (isDone(it, ds) ? ' done' : '');
       if (isDone(it, ds)) { const k = document.createElement('i'); k.className = 'ck'; ch.appendChild(k); }
@@ -988,7 +1009,6 @@ function renderGrid() {
       box.appendChild(ch);
     });
     c.appendChild(box);
-    if (evs.length > 4) { const m = document.createElement('div'); m.className = 'more'; m.textContent = '+' + (evs.length - 4); c.appendChild(m); }
     grid.appendChild(c);
   }
 }
