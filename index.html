@@ -7,8 +7,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#0f0d0a">
-<script>try { if (localStorage.getItem('my-app-theme') === 'light') { document.documentElement.classList.add('light'); document.querySelector('meta[name=theme-color]').content = '#faf9f7'; } } catch (e) {}</script>
+<meta name="theme-color" content="#f1f0eb">
+<script>try { if (localStorage.getItem('my-app-theme') !== 'dark') { document.documentElement.classList.add('light'); document.querySelector('meta[name=theme-color]').content = '#f1f0eb'; } } catch (e) {}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -468,6 +468,135 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
 @keyframes scrimIn{from{opacity:0}}
 #grid{will-change:transform}
 
+
+/* ===== natural neutral calendar ===== */
+:root:root:root,
+html.light:root:root{
+  --bg:#F1F0EB;--paper:#FCFBF8;--ink:#292A27;--body:#41423D;--muted:#777970;
+  --line:#E4E1D9;--rule:#D4D1C8;--accent:#A1AA95;--accentText:#2C3028;
+  --hover:#ECECE5;--check:#849178;--soft:#F4F2ED;--we:#ECEBE5;--wk:#858D79;
+  --c1:#87977C;--c2:#B79E80;--c3:#829D9A;--c4:#B48F88;--c5:#AA9E72;
+  --c6:#8E9AAF;--c7:#B39BA9;--c8:#9B8873;
+  --glow:0 5px 16px rgba(49,48,42,.08);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  color-scheme:light
+}
+html:not(.light):root:root{
+  --bg:#201F1A;--paper:#292821;--ink:#F0EEE7;--body:#D8D6CE;--muted:#A5A297;
+  --line:#3C3A32;--rule:#514E44;--accent:#929C86;--accentText:#252820;
+  --hover:#333229;--check:#A5B096;--soft:#302F27;--we:#24231E;--wk:#AEB59F;
+  --c1:#A6B79A;--c2:#D0B595;--c3:#9DB9B5;--c4:#D0A59D;--c5:#C7B884;
+  --c6:#AAB7D0;--c7:#D0B5C4;--c8:#BAA38A;
+  --glow:0 5px 18px rgba(0,0,0,.22);
+  color-scheme:dark
+}
+body{background:var(--bg);color:var(--body)}
+#appBar{background:var(--bg);border:0;padding-top:12px;padding-bottom:8px}
+#appName{color:var(--ink);font-weight:650;letter-spacing:-.02em}
+#acct,#appTheme{border-radius:999px}
+#mtitle{font-size:clamp(27px,3vw,38px);line-height:1.12;font-weight:650;letter-spacing:-.035em;color:var(--ink)}
+#mtitle span{color:var(--muted);font-weight:450}
+.head{gap:8px;margin-bottom:14px}
+.wd{background:var(--soft);border-radius:12px;padding:7px 0;margin-bottom:6px}
+.wd div{font-size:12px;font-weight:550;color:var(--muted)}
+.wd div.wk,.day.we:not(.today):not(.out) .num{color:var(--wk)}
+.wd div.now{color:var(--accentText)}
+.grid{gap:4px;border:0;min-height:540px;background:transparent}
+.day,.day.we{
+  background:var(--soft);border:0;border-radius:10px;padding:5px 4px 4px;gap:4px;
+  transition:background-color .18s ease,box-shadow .18s ease
+}
+.day:hover{background:var(--hover)}
+.day.sel{background:color-mix(in srgb,var(--accent) 28%,var(--paper));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accentText) 28%,transparent)}
+.day.sel:not(.today) .num{box-shadow:none;background:var(--paper)}
+.day.today .num{background:var(--accent);color:var(--accentText);font-weight:650}
+.day.out{background:color-mix(in srgb,var(--soft) 55%,var(--bg))}
+.day.out .num{color:var(--muted)}
+.num{align-self:center;width:28px;height:28px;font-size:14px;font-weight:500;color:var(--ink)}
+.dn{background:var(--accent);opacity:1}
+.chips{gap:3px}
+.chip,.chip.done{
+  border:0;border-radius:6px;padding:2px 6px;font-size:11.5px;font-weight:500;
+  background:color-mix(in srgb,var(--cc) 19%,var(--paper));
+  color:color-mix(in srgb,var(--cc) 74%,var(--ink));line-height:1.4
+}
+.chip.done{background:color-mix(in srgb,var(--cc) 10%,var(--paper));color:var(--muted)}
+.chip .ck{border-color:currentColor}
+.more{padding-top:1px;color:var(--muted)}
+.panel{
+  border:1px solid var(--line);border-radius:22px;background:var(--paper);
+  box-shadow:var(--glow);padding:20px 20px 30px;gap:13px
+}
+#dtitle{font-size:20px;font-weight:620;letter-spacing:-.025em;color:var(--ink)}
+.dsub{color:var(--muted)}
+#quick,.editor input[type=text],.editor textarea,.editor select,.editor input[type=time],.lg input{
+  background:var(--paper);border:1px solid var(--line);border-radius:10px;color:var(--ink)
+}
+#quick{padding:9px 12px}
+#quick:focus,.editor input:focus,.editor textarea:focus,.editor select:focus,.lg input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+#addBtn,.eact .ok,.lg .pri,#fab{
+  background:var(--accent);color:var(--accentText);border-radius:10px;box-shadow:none
+}
+#addBtn:hover,.eact .ok:hover,.lg .pri:hover,#fab:hover{background:color-mix(in srgb,var(--accent) 84%,var(--ink))}
+.ev{border-color:var(--line)}
+.ev::before{border-radius:99px}
+.ev input[type=checkbox]{border-radius:6px}
+.ev input:checked{background:var(--check);border-color:var(--check)}
+.ev.open{background:var(--soft);border-radius:12px 12px 0 0}
+.editor{background:var(--soft);border:0;border-radius:0 0 12px 12px}
+.editor .f-title{background:var(--paper)}
+.eact .ok{padding-inline:14px}
+.csw{box-shadow:0 0 0 1px var(--line)}
+.pill{border-radius:999px}
+.pill.on{background:color-mix(in srgb,var(--accent) 30%,var(--paper));border-color:color-mix(in srgb,var(--accentText) 28%,transparent);color:var(--ink)}
+.qtime input{color-scheme:light}
+.sec h3{font-size:12px;letter-spacing:.01em;text-transform:none;color:var(--ink);font-weight:600}
+#daynote{border-color:var(--line)}
+.empty{color:var(--muted)}
+.mp{border-radius:999px;background:var(--paper);border-color:var(--line)}
+.mp.on{background:var(--accent);border-color:var(--accent);color:var(--accentText)}
+.mp.on small{color:color-mix(in srgb,var(--accentText) 72%,transparent)}
+.nb{border-radius:999px}
+#split::before{background:var(--line)}
+#split:hover::before,body.dragging #split::before{background:var(--accent)}
+:focus-visible{outline:2px solid var(--accentText);outline-offset:2px}
+html.light .qtime input{color-scheme:light}
+html:not(.light) .qtime input{color-scheme:dark}
+html.light #fab,html:not(.light) #fab{box-shadow:0 7px 20px color-mix(in srgb,var(--accentText) 14%,transparent)}
+@media (min-width:901px){
+  #appCal{padding:12px 16px 16px}
+  .app{gap:10px}
+  .cal{padding:15px clamp(16px,1.5vw,24px);border:1px solid var(--line);border-radius:22px;background:var(--paper);box-shadow:var(--glow)}
+  .panel{border:1px solid var(--line);padding:20px 20px 30px}
+  .grid{min-height:calc(var(--rows,5) * 84px)}
+}
+@media (max-width:900px){
+  #appCal{padding:10px}
+  .app{display:block;height:auto}
+  .cal{height:auto;padding:14px 16px 12px;border:1px solid var(--line);border-radius:20px;background:var(--paper);box-shadow:var(--glow)}
+  .panel{height:auto;margin-top:12px;padding:18px 18px 30px;border:1px solid var(--line);border-radius:20px;background:var(--paper);box-shadow:var(--glow)}
+  .grid{gap:3px}
+}
+@media (max-width:600px){
+  #appBar{padding:9px 12px 6px}
+  #appCal{padding:7px}
+  .cal{padding:11px 9px 10px;border-radius:17px}
+  .head{gap:4px;margin-bottom:12px}
+  #mtitle{font-size:26px}
+  .wd{border-radius:9px;padding:6px 0;margin-bottom:4px}
+  .wd div{font-size:11px}
+  .grid{gap:2px}
+  .day,.day.we{padding:4px 1px 3px;border-radius:7px;gap:3px}
+  .num{width:24px;height:24px;font-size:13px}
+  .chip,.chip.done{border-radius:4px;padding:2px 2px;font-size:9.5px}
+  .panel{margin-top:9px;padding:16px 14px 26px;border-radius:17px}
+  #dtitle{font-size:18px}
+  #fab{border-radius:17px}
+}
+@media (prefers-reduced-motion:reduce){
+  .day{transition:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -618,7 +747,7 @@ html.theming,html.theming *{transition:background-color .35s ease,color .35s eas
     const light = document.documentElement.classList.contains('light');
     document.getElementById('themeLbl2').textContent = light ? 'Тёмная тема' : 'Светлая тема';
     tBtn.setAttribute('aria-label', light ? 'Включить тёмную тему' : 'Включить светлую тему');
-    meta.content = light ? '#faf9f7' : '#0f0d0a';
+    meta.content = light ? '#f1f0eb' : '#201f1a';
   };
   tBtn.onclick = () => {
     const H = document.documentElement; H.classList.add('theming'); clearTimeout(tBtn.t); tBtn.t = setTimeout(() => H.classList.remove('theming'), 420);
