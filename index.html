@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#f1f0eb">
-<script>try { if (localStorage.getItem('my-app-theme') !== 'dark') { document.documentElement.classList.add('light'); document.querySelector('meta[name=theme-color]').content = '#f1f0eb'; } } catch (e) {}</script>
+<script>try { const H = document.documentElement, light = localStorage.getItem('my-app-theme') !== 'dark'; H.classList.toggle('light', light); document.querySelector('meta[name=theme-color]').content = light ? '#f1f0eb' : '#111210'; } catch (e) {}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -243,7 +243,7 @@ textarea,select{font:inherit}
 /* ===== month view: Google-Calendar-like structure ===== */
 @media (min-width:901px){.app{grid-template-rows:minmax(0,1fr)}.cal{min-height:0}.panel{min-height:0}}
 :root:root:root{--c1:#8ea6cc;--c2:#7d86bd;--c3:#86a891;--c4:#5f8a72;--c5:#c98585;--c6:#a592c4;--c7:#d3a0b4;--c8:#a88b74}
-.c6{--cc:var(--c6)}.c7{--cc:var(--c7)}.c8{--cc:var(--c8)}
+.c6{--cc:var(--c6)}.c7{--cc:var(--c7)}.c8{--cc:var(--c8)}.c9{--cc:var(--c9)}.c10{--cc:var(--c10)}
 #mtitle span{color:var(--accent)}
 .wd{padding:0 0 8px}
 .wd div{padding:0;text-align:center;font-size:13px;letter-spacing:0;text-transform:none;color:var(--muted)}
@@ -475,18 +475,18 @@ html.light:root:root{
   --bg:#F1F0EB;--paper:#FCFBF8;--ink:#292A27;--body:#41423D;--muted:#777970;
   --line:#E4E1D9;--rule:#D4D1C8;--accent:#A1AA95;--accentText:#2C3028;--focus:#68725B;
   --hover:#ECECE5;--check:#849178;--soft:#F4F2ED;--we:#ECEBE5;--wk:#858D79;
-  --c1:#87977C;--c2:#B79E80;--c3:#829D9A;--c4:#B48F88;--c5:#AA9E72;
-  --c6:#8E9AAF;--c7:#B39BA9;--c8:#9B8873;
+  --c1:#9DAA91;--c2:#D8C8B2;--c3:#A9BEC1;--c4:#D2AAA2;--c5:#D7C78F;
+  --c6:#BEB5D0;--c7:#D7B5C3;--c8:#AD937D;--c9:#A7C6B9;--c10:#E7BFA3;
   --glow:0 5px 16px rgba(49,48,42,.08);
-  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Segoe UI",sans-serif;
   color-scheme:light
 }
 html:not(.light):root:root{
-  --bg:#201F1A;--paper:#292821;--ink:#F0EEE7;--body:#D8D6CE;--muted:#A5A297;
-  --line:#3C3A32;--rule:#514E44;--accent:#929C86;--accentText:#252820;--focus:#C4CEB6;
-  --hover:#333229;--check:#A5B096;--soft:#302F27;--we:#24231E;--wk:#AEB59F;
-  --c1:#A6B79A;--c2:#D0B595;--c3:#9DB9B5;--c4:#D0A59D;--c5:#C7B884;
-  --c6:#AAB7D0;--c7:#D0B5C4;--c8:#BAA38A;
+  --bg:#111210;--paper:#191A17;--ink:#F1F0E9;--body:#D6D5CC;--muted:#A2A197;
+  --line:#30312C;--rule:#484942;--accent:#A1AA95;--accentText:#252820;--focus:#C4CEB6;
+  --hover:#242520;--check:#AAB69A;--soft:#20211D;--we:#161714;--wk:#B6BDA8;
+  --c1:#AAB79E;--c2:#D7C3A9;--c3:#A5BEC0;--c4:#D3A59D;--c5:#D5C589;
+  --c6:#B8AFCE;--c7:#D6B1C0;--c8:#B49B83;--c9:#A5C5B8;--c10:#E7B89D;
   --glow:0 5px 18px rgba(0,0,0,.22);
   color-scheme:dark
 }
@@ -597,6 +597,10 @@ html.light #fab,html:not(.light) #fab{box-shadow:0 7px 20px color-mix(in srgb,va
   .day{transition:none!important}
 }
 
+
+/* Event labels keep the pastel palette while staying readable in each theme. */
+.chip:not(.done){color:color-mix(in srgb,var(--cc) 38%,var(--ink))}
+html:not(.light) .chip:not(.done){color:color-mix(in srgb,var(--cc) 78%,var(--ink))}
 </style>
 </head>
 <body>
@@ -747,7 +751,7 @@ html.light #fab,html:not(.light) #fab{box-shadow:0 7px 20px color-mix(in srgb,va
     const light = document.documentElement.classList.contains('light');
     document.getElementById('themeLbl2').textContent = light ? 'Тёмная тема' : 'Светлая тема';
     tBtn.setAttribute('aria-label', light ? 'Включить тёмную тему' : 'Включить светлую тему');
-    meta.content = light ? '#f1f0eb' : '#201f1a';
+    meta.content = light ? '#f1f0eb' : '#111210';
   };
   tBtn.onclick = () => {
     const H = document.documentElement; H.classList.add('theming'); clearTimeout(tBtn.t); tBtn.t = setTimeout(() => H.classList.remove('theming'), 420);
@@ -877,7 +881,7 @@ const MONTHS = ['Январь','Февраль','Март','Апрель','Ма�
 const MONTHS_G = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const WD_FULL = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
 const WD_SHORT = ['вс','пн','вт','ср','чт','пт','сб'];
-const COLORS = ['c1','c2','c3','c4','c5','c6','c7','c8'];
+const COLORS = ['c1','c2','c3','c4','c5','c6','c7','c8','c9','c10'];
 const REPEAT = {'': 'Не повторять', d: 'Каждый день', w: 'Каждую неделю', m: 'Каждый месяц', y: 'Каждый год'};
 const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2, 10);
