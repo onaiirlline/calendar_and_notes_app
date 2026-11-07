@@ -641,6 +641,26 @@ html.day-modal-open,html.day-modal-open body{overflow:hidden}
   .cal{height:auto;min-height:100dvh}
   .panel{left:0;right:0;top:max(8px,env(safe-area-inset-top));bottom:0;transform:none;width:auto;max-height:none;height:auto;border-radius:24px 24px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom))}
 }
+
+/* Keep every part of the day window aligned to its own padded frame. */
+.panel{box-sizing:border-box;align-items:stretch}
+.panel>*{width:100%;min-width:0}
+.panel-head>div{flex:1;min-width:0}
+.quick{align-items:stretch;width:100%;min-width:0}
+#quick{box-sizing:border-box;flex:1 1 0%;width:0;min-width:0}
+#addBtn{box-sizing:border-box;display:grid;place-items:center;flex:0 0 46px;width:46px;min-width:46px;height:46px;padding:0}
+#qopts,#clist,.sec,#daynote{box-sizing:border-box;width:100%;min-width:0}
+.day-overlay:not([hidden]){animation:dayOverlayEnter 190ms ease-out both}
+.panel.is-open{animation:dayPanelEnter 240ms cubic-bezier(.2,.8,.2,1) both}
+@keyframes dayOverlayEnter{from{opacity:0}to{opacity:1}}
+@keyframes dayPanelEnter{from{opacity:0;transform:translate(-50%,-48%) scale(.985)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@media(max-width:900px){
+  .panel{left:50%;right:auto;top:max(8px,env(safe-area-inset-top));bottom:8px;transform:translateX(-50%);width:calc(100vw - 24px);height:auto;max-height:none;border-radius:24px;animation:dayPanelEnterMobile 240ms cubic-bezier(.2,.8,.2,1) both}
+}
+@keyframes dayPanelEnterMobile{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+@media(prefers-reduced-motion:reduce){
+  .day-overlay:not([hidden]),.panel.is-open{animation:none!important}
+}
 </style>
 </head>
 <body>
