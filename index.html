@@ -622,6 +622,25 @@ html:not(.light) .chip:not(.done){color:color-mix(in srgb,var(--cc) 78%,var(--in
   .day.today .num{background:var(--accent)}
 }
 
+
+/* Day details open as a modal on both desktop and mobile. */
+.app{display:block;height:100%}
+#split{display:none!important}
+.day-overlay{position:fixed;inset:0;z-index:1001;background:rgba(7,8,7,.66);backdrop-filter:blur(5px)}
+.day-overlay[hidden]{display:none}
+.panel{position:fixed;z-index:1002;left:50%;top:50%;right:auto;bottom:auto;transform:translate(-50%,-50%);display:none;width:min(720px,calc(100vw - 40px));height:auto;max-height:min(88dvh,900px);overflow:auto;border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:0 24px 80px rgba(0,0,0,.48)}
+.panel.is-open{display:flex}
+.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+#closePanel{flex:none;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:var(--paper);color:var(--muted);font:inherit;font-size:24px;line-height:1;cursor:pointer}
+#closePanel:hover{background:var(--hover);color:var(--ink)}
+html.day-modal-open,html.day-modal-open body{overflow:hidden}
+.ev .tt{appearance:none;-webkit-appearance:none;display:inline;text-align:left;padding:0;border:0;background:transparent;color:inherit;font:inherit;font-weight:500;overflow-wrap:anywhere;cursor:pointer}
+.ev .tt:focus-visible,#closePanel:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(max-width:900px){
+  .app{height:auto;min-height:100%}
+  .cal{height:auto;min-height:100dvh}
+  .panel{left:0;right:0;top:max(8px,env(safe-area-inset-top));bottom:0;transform:none;width:auto;max-height:none;height:auto;border-radius:24px 24px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom))}
+}
 </style>
 </head>
 <body>
@@ -654,10 +673,14 @@ html:not(.light) .chip:not(.done){color:color-mix(in srgb,var(--cc) 78%,var(--in
     <button id="fab" aria-label="Новое дело">+</button>
   </section>
   <div id="split" role="separator" aria-orientation="vertical" aria-label="Изменить ширину календаря" title="Потяните, чтобы изменить ширину" tabindex="0"></div>
-  <div class="panel" id="panel">
-    <div>
-      <h2 id="dtitle"></h2>
-      <div class="dsub" id="dsub"></div>
+  <div class="day-overlay" id="dayOverlay" hidden></div>
+  <div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="dtitle" aria-hidden="true">
+    <div class="panel-head">
+      <div>
+        <h2 id="dtitle"></h2>
+        <div class="dsub" id="dsub"></div>
+      </div>
+      <button id="closePanel" type="button" aria-label="Закрыть окно дня">×</button>
     </div>
     <div class="quick">
       <input id="quick" placeholder="Добавить: 15:30 Стоматолог" autocomplete="off">
@@ -1003,7 +1026,6 @@ function renderGrid() {
     evs.forEach(it => {
       const ch = document.createElement('div');
       ch.className = 'chip ' + (it.color || 'c1') + (it.time ? '' : ' allday') + (isDone(it, ds) ? ' done' : '');
-      if (isDone(it, ds)) { const k = document.createElement('i'); k.className = 'ck'; ch.appendChild(k); }
       if (it.time) { const b = document.createElement('b'); b.textContent = it.time; ch.appendChild(b); }
       const s = document.createElement('span'); s.textContent = it.title || 'Без названия'; ch.appendChild(s);
       box.appendChild(ch);
@@ -1014,8 +1036,7 @@ function renderGrid() {
 }
 grid.addEventListener('click', e => {
   const c = e.target.closest('.day'); if (!c) return;
-  select(c.dataset.ds);
-  if (matchMedia('(max-width:900px)').matches) $('#panel').scrollIntoView({behavior: 'smooth', block: 'start'});
+  openDayPanel(c.dataset.ds);
 });
 function select(ds, keepView) {
   closeEditor();
@@ -1024,6 +1045,24 @@ function select(ds, keepView) {
   if (!keepView) { view.y = d.getFullYear(); view.m = d.getMonth(); }
   renderAll();
 }
+function openDayPanel(ds = sel) {
+  if (ds !== sel) select(ds);
+  $('#panel').classList.add('is-open');
+  $('#panel').setAttribute('aria-hidden', 'false');
+  $('#dayOverlay').hidden = false;
+  document.documentElement.classList.add('day-modal-open');
+  requestAnimationFrame(() => $('#closePanel').focus());
+}
+function closeDayPanel() {
+  $('#panel').classList.remove('is-open');
+  $('#panel').setAttribute('aria-hidden', 'true');
+  $('#dayOverlay').hidden = true;
+  document.documentElement.classList.remove('day-modal-open');
+  const day = document.querySelector('.day[data-ds="' + sel + '"]');
+  if (day) day.focus({preventScroll:true});
+}
+$('#closePanel').addEventListener('click', closeDayPanel);
+$('#dayOverlay').addEventListener('click', closeDayPanel);
 function shiftMonth(n) {
   const d = new Date(view.y, view.m + n, 1);
   view.y = d.getFullYear(); view.m = d.getMonth();
@@ -1033,11 +1072,11 @@ function shiftMonth(n) {
   sel = ymd(new Date(view.y, view.m, day));
   renderAll();
 }
-$('#fab').onclick = () => { $('#addBtn').click(); $('#panel').scrollIntoView({behavior: 'smooth', block: 'start'}); };
+$('#fab').onclick = () => { openDayPanel(); $('#addBtn').click(); };
 window.calShift = shiftMonth;
 $('#prev').onclick = () => shiftMonth(-1);
 $('#next').onclick = () => shiftMonth(1);
-$('#todayBtn').onclick = () => select(todayS());
+$('#todayBtn').onclick = () => { select(todayS()); openDayPanel(); };
 
 /* ---------- day panel ---------- */
 function relDay(ds) {
@@ -1051,7 +1090,7 @@ function renderSub() {
   const evs = eventsOn(sel), done = evs.filter(it => isDone(it, sel)).length;
   const sub = $('#dsub'); sub.innerHTML = '';
   const r = document.createElement('span'); r.textContent = relDay(sel); sub.appendChild(r);
-  if (evs.length) { const p = document.createElement('span'); p.textContent = `✓ ${done} из ${evs.length}`; sub.appendChild(p); }
+  if (evs.length) { const p = document.createElement('span'); p.textContent = `Готово: ${done} из ${evs.length}`; sub.appendChild(p); }
 }
 function renderDay() {
   const d = parse(sel);
@@ -1073,19 +1112,21 @@ function renderList() {
     const row = document.createElement('div');
     row.className = 'ev ' + (it.color || 'c1') + (isDone(it, sel) ? ' done' : '') + (open === it.id ? ' open' : '');
     row.dataset.id = it.id;
-    const ck = document.createElement('input'); ck.type = 'checkbox'; ck.checked = isDone(it, sel); ck.title = 'Выполнено';
-    ck.setAttribute('aria-label', 'Выполнено');
-    ck.onchange = () => toggleDone(it);
+    const completed = isDone(it, sel);
     const m = document.createElement('div'); m.className = 'evm';
-    m.innerHTML = '<div class="evt"><span class="tm"></span><span class="tt"></span><span class="rp"></span></div><div class="nt"></div>';
+    m.innerHTML = '<div class="evt"><span class="tm"></span><button type="button" class="tt"></button><span class="rp"></span></div><div class="nt"></div>';
     m.querySelector('.tm').textContent = timeLabel(it);
-    m.querySelector('.tt').textContent = it.title;
+    const title = m.querySelector('.tt');
+    title.textContent = it.title || 'Без названия';
+    title.setAttribute('aria-label', (completed ? 'Отметить невыполненным: ' : 'Отметить выполненным: ') + title.textContent);
+    title.setAttribute('aria-pressed', String(completed));
+    title.onclick = e => { e.stopPropagation(); toggleDone(it); };
     m.querySelector('.rp').textContent = it.repeat ? '↻' : '';
     m.querySelector('.rp').title = REPEAT[it.repeat] || '';
     const nt = m.querySelector('.nt');
     if (open !== it.id && it.note) nt.textContent = it.note.length > 140 ? it.note.slice(0, 140) + '…' : it.note; else nt.remove();
-    m.onclick = () => { if (open === it.id) closeEditor(); else { closeEditor(); open = it.id; } renderList(); if (open) focusEditor(); };
-    row.append(ck, m);
+    m.onclick = e => { if (e.target.closest('.tt')) return; if (open === it.id) closeEditor(); else { closeEditor(); open = it.id; } renderList(); if (open) focusEditor(); };
+    row.append(m);
     list.appendChild(row);
     if (open === it.id) list.appendChild(editorEl(it));
   });
@@ -1238,7 +1279,7 @@ $('#daynote').addEventListener('input', e => {
 
 /* keyboard */
 document.addEventListener('keydown', e => {
-
+  if (e.key === 'Escape' && $('#panel').classList.contains('is-open')) { closeDayPanel(); return; }
   const a = document.activeElement;
   if (a && (a.matches('input, textarea, select') || a.isContentEditable)) {
     if (e.key === 'Escape') { a.blur(); if (open) { closeEditor(); renderList(); renderGrid(); } }
